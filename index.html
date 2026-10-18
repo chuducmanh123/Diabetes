@@ -40,7 +40,7 @@
     </div>
   </header>
 
-  <!-- Navigation Tabs (Sắp xếp theo thứ tự thời gian: 06h sáng -> 18h chiều -> Cấp cứu DKA/HHS) -->
+  <!-- Navigation Tabs (06h sáng -> 18h chiều -> Cấp cứu DKA/HHS) -->
   <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-[60px] z-40">
     <div class="max-w-6xl mx-auto px-4 flex space-x-2 overflow-x-auto py-2">
       <button type="button" id="tab-btn-06h" class="tab-btn flex items-center px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white shadow-sm transition">
@@ -72,14 +72,14 @@
           </span>
         </div>
 
-        <!-- Dynamic Timepoint Selector Bar (Thanh mốc giờ đánh giá thích ứng) -->
+        <!-- Dynamic Timepoint Selector Bar -->
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">
               <i class="fa-regular fa-clock mr-1 text-blue-600"></i> Thời Điểm Đánh Giá / Lần Đo:
             </span>
             <span id="current-checkpoint-tag" class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-              Lần đầu (06h00)
+              06h00 (Trước ăn)
             </span>
           </div>
           <div id="timepoint-btn-container" class="grid grid-cols-2 md:grid-cols-4 gap-1.5">
@@ -96,11 +96,11 @@
             <div class="flex justify-between items-center mb-1">
               <label for="glucose-slider" class="text-sm font-semibold text-slate-700">Đường Huyết Mao Mạch (BG):</label>
               <div class="text-right">
-                <span id="glucose-val" class="text-base font-bold text-blue-700">310</span> <span class="text-xs text-slate-500">mg/dL</span>
-                <span id="glucose-mmol" class="text-xs font-medium text-slate-400 ml-1">(17.2 mmol/L)</span>
+                <span id="glucose-val" class="text-base font-bold text-blue-700">275</span> <span class="text-xs text-slate-500">mg/dL</span>
+                <span id="glucose-mmol" class="text-xs font-medium text-slate-400 ml-1">(15.3 mmol/L)</span>
               </div>
             </div>
-            <input type="range" id="glucose-slider" min="40" max="650" step="5" value="310" class="w-full accent-blue-600">
+            <input type="range" id="glucose-slider" min="40" max="650" step="5" value="275" class="w-full accent-blue-600">
             <div class="flex justify-between text-[11px] text-slate-500 px-1 mt-0.5 font-medium">
               <span class="text-red-500">&lt; 70 (Hạ đường)</span>
               <span class="text-emerald-600 font-bold">Chuẩn: 140 - 180 mg/dL</span>
@@ -316,7 +316,7 @@
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex items-center space-x-2 text-blue-700 font-bold text-sm mb-2 pb-1 border-b border-slate-100">
               <i class="fa-solid fa-syringe"></i>
-              <span id="title-pillar-med">1. Y LỆNH THUỐC (Novomix 30 &amp; Actrapid)</span>
+              <span id="title-pillar-med">1. Y LỆNH THUỐC CẤP THỜI (Novomix 30 &amp; Actrapid)</span>
             </div>
             <div id="order-medication" class="text-sm text-slate-700 space-y-2 leading-relaxed"></div>
           </div>
@@ -369,7 +369,7 @@
             </div>
             <div class="pt-2 text-center">
               <button type="button" onclick="switchTab('18h')" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow transition">
-                <i class="fa-solid fa-arrow-right mr-1.5"></i> Chuyển sang Phác đồ Tiêm Dưới Da
+                <i class="fa-solid fa-arrow-right mr-1.5"></i> Chuyển sang Phác đồ Tiêm Dưới Da (Tab 18h00)
               </button>
             </div>
           </div>
@@ -432,23 +432,22 @@
 
   <!-- JavaScript Application Logic -->
   <script>
-    var currentMode = '06h'; // Default start with 06h
+    var currentMode = '06h'; // Default start with 06h Morning
     var currentTimepoint = 't0';
     var savedSnapshots = [];
 
-    // Configuration of timepoints per mode
     var timepointConfigs = {
       '06h': [
-        { id: 't0', label: '06h00 (Trước ăn)', hint: '*Mốc 06h00: Đánh giá đường huyết đói, tiêm Novomix sáng và lên kế hoạch chỉnh liều chiều 18h.' },
-        { id: 't1', label: '08h30 (Sau ăn)', hint: '*Mốc 08h30: Đánh giá đỉnh đường huyết sau ăn sáng, phát hiện nguy cơ hạ đường sớm nếu ăn ít.' },
-        { id: 't2', label: '11h30 (Trước trưa)', hint: '*Mốc 11h30: Bắt buộc đo trước bữa trưa để đánh giá hiệu quả mũi sáng và kiểm tra tương tác Corticoid.' },
-        { id: 't4', label: '18h00 (Trước tối)', hint: '*Mốc 18h00: Đo trước ăn tối để quyết định liều Novomix chiều (đã áp dụng hiệu chỉnh từ sáng).' }
+        { id: 't0', label: '06h00 (Trước ăn)', hint: '*Mốc 06h00: Đánh giá đường huyết đói, xử trí Novomix sáng / Actrapid và điều chỉnh cử chiều 18h.' },
+        { id: 't1', label: '08h30 (Sau ăn)', hint: '*Mốc 08h30: Đánh giá đỉnh đường huyết sau ăn sáng, phòng hạ đường sớm nếu bệnh nhân bỏ bữa.' },
+        { id: 't2', label: '11h30 (Trước trưa)', hint: '*Mốc 11h30: Đo trước bữa trưa để đánh giá hiệu quả mũi sáng và kiểm tra tương tác Corticoid.' },
+        { id: 't4', label: '18h00 (Trước tối)', hint: '*Mốc 18h00: Chuyển giao sang chu kỳ cử chiều 18h00.' }
       ],
       '18h': [
-        { id: 't0', label: '18h00 (Trước ăn)', hint: '*Mốc 18h00: Đánh giá trước bữa tối, tiêm Novomix chiều và Actrapid hiệu chỉnh (nếu cần).' },
-        { id: 't1', label: '20h30 (Sau ăn)', hint: '*Mốc 20h30: Đánh giá sau ăn tối, phòng ngừa hạ đường nếu người bệnh bỏ dở bữa sau tiêm.' },
-        { id: 't2', label: '22h00 (Trước ngủ)', hint: '*Mốc 22h00: Đo trước khi đi ngủ - Canh đỉnh tác dụng của Protamine nền để chống hạ đường huyết đêm.' },
-        { id: 't4', label: '02h00 (Nửa đêm)', hint: '*Mốc 02h00: Đo lúc nửa đêm ở bệnh nhân cao tuổi/suy thận hoặc để phân biệt Somogyi.' }
+        { id: 't0', label: '18h00 (Trước ăn)', hint: '*Mốc 18h00: Đánh giá trước bữa tối, quyết định liều Novomix chiều / Actrapid và lịch canh đêm.' },
+        { id: 't1', label: '20h30 (Sau ăn)', hint: '*Mốc 20h30: Đánh giá sau ăn tối, xử trí ngay nếu người bệnh nôn hoặc bỏ dở suất ăn.' },
+        { id: 't2', label: '22h00 (Trước ngủ)', hint: '*Mốc 22h00: Chốt chặn trước khi ngủ - Canh đỉnh tác dụng của Protamine nền chống hạ đường đêm.' },
+        { id: 't4', label: '02h00 (Nửa đêm)', hint: '*Mốc 02h00: Đo lúc nửa đêm ở bệnh nhân nguy cơ cao hoặc phân biệt hiện tượng Somogyi.' }
       ],
       'dka': [
         { id: 't0', label: 'Giờ đầu (T0)', hint: '*Mốc khởi đầu: Hồi sức dịch NaCl 0.9% giờ đầu, kiểm tra K+ máu trước khi mở BTE Insulin.' },
@@ -483,7 +482,7 @@
 
     function switchTab(mode) {
       currentMode = mode;
-      currentTimepoint = 't0'; // Reset to initial checkpoint of this tab
+      currentTimepoint = 't0';
       
       var tabs = ['06h', '18h', 'dka'];
       tabs.forEach(function(t) {
@@ -598,7 +597,573 @@
     }
 
     // =========================================================================
-    // 1. DKA / HHS CALCULATION LOGIC (ADAPTIVE FROM T0 TO T4+)
+    // 1. PHÁC ĐỒ TRỰC SÁNG 06H00 (ĐẦY ĐỦ 9 MỨC TẠI T0 + THÍCH ỨNG T1, T2, T4)
+    // =========================================================================
+    function calculateInpatient06h(bg, weight, doseMorn, doseEve, tdd, isHighRisk) {
+      var statusCard = document.getElementById('status-card');
+      var statusTitle = document.getElementById('status-title');
+      var statusCategory = document.getElementById('status-category');
+      var statusIcon = document.getElementById('status-icon');
+
+      var titleMed = document.getElementById('title-pillar-med');
+      var titleNutri = document.getElementById('title-pillar-nutri');
+      var orderMed = document.getElementById('order-medication');
+      var orderNutri = document.getElementById('order-nutrition');
+      var orderTimeline = document.getElementById('order-timeline');
+      var orderAdj = document.getElementById('order-adjustment');
+
+      var actAdd = (tdd > 40) ? 2 : 0;
+      var actRiskAdj = isHighRisk ? -1 : 0;
+
+      var riskAlert = isHighRisk 
+        ? '<div class="p-2.5 mb-2 bg-amber-100 border border-amber-300 text-amber-950 rounded-xl text-xs font-bold flex items-center">' +
+          '<i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mr-2"></i>' +
+          '<span>ĐÃ BẬT CHẾ ĐỘ NGUY CƠ CAO (Cao tuổi &ge; 65 / Suy thận eGFR &lt; 45 / Ăn kém): Tự động giảm liều an toàn.</span>' +
+          '</div>' 
+        : '';
+
+      // ---------------- MỐC T0: 06H00 SÁNG (ĐẦY ĐỦ 9 MỨC CHI TIẾT) ----------------
+      if (currentTimepoint === 't0') {
+        titleMed.innerText = "1. Y LỆNH THUỐC LÚC 06H00 SÁNG (Novomix 30 sáng & Actrapid)";
+        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN SÁNG & THỜI ĐIỂM TIÊM";
+
+        if (bg < 70) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Hạ Đường Huyết Đói Cấp Cứu (< 70 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Tụt đường huyết ban đêm do dư thành phần Protamine nền cử chiều!";
+
+          var safeMorn30 = Math.round(doseMorn * 0.7);
+          var safeMorn50 = Math.round(doseMorn * 0.5);
+          var nextEve = Math.max(2, Math.round(doseEve * 0.8));
+
+          orderMed.innerHTML = riskAlert + '<div class="p-3 bg-red-50 text-red-900 border border-red-200 rounded-xl space-y-1">' +
+            '<p class="font-bold text-red-700"><i class="fa-solid fa-ban mr-1"></i> TẠM NGƯNG NGAY Novomix 30 cử sáng!</p>' +
+            '<p>• <b>Cấp cứu Quy tắc 15:</b> Uống 15–20g đường nhanh (nước đường, sữa có đường) hoặc tiêm TM Glucose 30% 30–50 mL nếu rối loạn tri giác/nôn ói.</p>' +
+            '<p>• <b>Khi đường huyết hồi phục &ge; 70 – 100 mg/dL:</b> ' +
+              (isHighRisk ? '<b class="text-red-700">Ưu tiên NGƯNG HẲN cử sáng (0 UI)</b> do bệnh nhân ăn kém, mệt mỏi, suy gan/thận.' : 
+              'Giảm 30% – 50% liều Novomix sáng: Tiêm <b class="text-amber-700">' + safeMorn50 + ' – ' + safeMorn30 + ' UI Novomix 30</b> (nếu tỉnh táo và ăn hết suất sáng).') +
+            '</p>' +
+            '<p>• Tuyệt đối không tiêm Actrapid.</p></div>';
+
+          orderNutri.innerHTML = '<p>• Chỉ cho ăn sáng ngay khi đường huyết đã hồi phục &ge; 70 mg/dL.</p>' +
+            '<p>• <b class="text-red-700">Thời điểm tiêm:</b> BẮT BUỘC chỉ tiêm sau khi bệnh nhân đã ăn sáng xong hoàn toàn (nếu có chỉ định tiêm liều giảm).</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Sau mỗi 15 phút', desc: 'Thử lại đường huyết mao mạch đến khi &ge; 70 mg/dL (chuyển mốc hoặc kéo thanh trượt)', critical: true },
+            { time: '11h30 trưa', desc: 'BẮT BUỘC đo lại trước bữa ăn trưa', critical: true },
+            { time: '18h00 chiều', desc: 'Đo kiểm tra lại trước bữa ăn tối', critical: true }
+          ]);
+
+          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• BẮT BUỘC GIẢM 20% LIỀU NOVOMIX CỬ CHIỀU (18h00) CỦA NGÀY HÔM NAY: Giảm từ ' + doseEve + ' UI xuống còn <span class="text-indigo-800 text-base">' + nextEve + ' UI</span> (do dư thành phần Protamine nền ban đêm).</p>';
+
+        } else if (bg >= 70 && bg <= 99) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Thấp Sát Ngưỡng Hạ Đường (70 - 99 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Đường huyết đói thấp sát ngưỡng, cần giảm liều và tiêm sau ăn";
+
+          var redMorn = isHighRisk ? Math.max(2, Math.round(doseMorn * 0.75)) : Math.max(2, Math.round(doseMorn * 0.8));
+          var nextEve10 = Math.max(2, Math.round(doseEve * 0.9));
+          var nextEve20 = Math.max(2, Math.round(doseEve * 0.8));
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giảm 20% liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700 text-base">' + redMorn + ' UI Novomix 30</span> (liều gốc: ' + doseMorn + ' UI).</p>' +
+            '<p>• Không tiêm Actrapid.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn bữa sáng đảm bảo đủ lượng tinh bột.</p>' +
+            '<p>• <b class="text-amber-800">Thời điểm tiêm:</b> TIÊM NGAY SAU KHI ĂN SÁNG XONG (tránh tụt đường huyết nếu bệnh nhân bỏ dở bữa).</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '11h30 trưa', desc: 'Đo kiểm tra lại trước bữa ăn trưa', critical: false },
+            { time: '18h00 chiều', desc: 'Đo kiểm tra trước bữa ăn tối', critical: true }
+          ]);
+
+          orderAdj.innerHTML = '<p>• <b>Giảm 10% – 20% liều Novomix cử chiều (18h00):</b> Giảm từ ' + doseEve + ' UI xuống còn <b>' + nextEve20 + ' – ' + nextEve10 + ' UI</b> để tránh nguy cơ tụt đường huyết đêm kế tiếp.</p>';
+
+        } else if (bg >= 100 && bg <= 139) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'emerald', 'Đạt Mục Tiêu Đói Lý Tưởng (100 - 139 mg/dL)', 'fa-circle-check');
+          statusTitle.innerText = "Đạt mục tiêu đường huyết đói lý tưởng";
+
+          var redMorn15 = Math.max(2, Math.round(doseMorn * 0.85));
+          orderMed.innerHTML = riskAlert + (isHighRisk ? 
+            '<p>• <b>Người cao tuổi (&ge; 65), suy thận (eGFR &lt; 45) hoặc ăn sáng ít:</b> Giảm nhẹ 10% – 20% liều Novomix sáng &rarr; Tiêm <span class="font-bold text-amber-700 text-base">' + redMorn15 + ' UI</span> (liều gốc: ' + doseMorn + ' UI).</p>' : 
+            '<p>• <b>Bệnh nhân trẻ, ăn uống tốt:</b> Giữ nguyên 100% liều Novomix sáng &rarr; Tiêm <span class="font-bold text-amber-700 text-base">' + doseMorn + ' UI</span>.</p>') +
+            '<p>• Không tiêm Actrapid.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn sáng bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm ngay trước khi ăn sáng.</p>';
+          orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đo lại đường huyết trước bữa ăn tối', critical: false }]);
+          orderAdj.innerHTML = '<p>• <b>Giữ nguyên phác đồ hiện tại</b> (cả cử sáng và cử chiều đang đạt hiệu quả tốt).</p>';
+
+        } else if (bg >= 140 && bg <= 180) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'emerald', 'Đạt Mục Tiêu Chuẩn Nội Trú ADA (140 - 180 mg/dL)', 'fa-circle-check');
+          statusTitle.innerText = "Đạt mục tiêu chuẩn nội viện theo khuyến cáo ADA 2026";
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên 100% liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700 text-base">' + doseMorn + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• Không tiêm Actrapid.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn sáng bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn sáng 5 – 10 phút.</p>';
+          orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đo lại đường huyết trước bữa ăn tối', critical: false }]);
+          orderAdj.innerHTML = '<p>• <b>Giữ nguyên phác đồ hiện tại.</b></p>';
+
+        } else if (bg >= 181 && bg <= 249) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Tăng Đường Huyết Đói Nhẹ - Vừa (181 - 249 mg/dL)', 'fa-circle-info');
+          statusTitle.innerText = "Tăng đường huyết đói nhẹ – vừa, theo dõi xu hướng 2 ngày liên tiếp";
+
+          var incEve10 = Math.round(doseEve * 1.1);
+          var incEve20 = Math.round(doseEve * 1.2);
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700 text-base">' + doseMorn + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Cân nhắc tiêm thêm 1 – 2 UI Actrapid (SC)</b> nếu bệnh nhân ăn sáng nhiều tinh bột hoặc đang dùng Corticoid buổi sáng.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn sáng bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn sáng 10 – 15 phút.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '11h30 trưa', desc: 'Đo kiểm tra nếu bệnh nhân có dùng Corticoid buổi sáng', critical: false },
+            { time: '18h00 chiều', desc: 'Đo lại đường huyết trước bữa ăn tối', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• <b>Nếu đường huyết đói (FBG) cao mức này liên tiếp &ge; 2 ngày:</b> Tăng 10% – 20% liều Novomix cử chiều (18h00) lên mức <b>' + incEve10 + ' – ' + incEve20 + ' UI</b>.</p>';
+
+        } else if (bg >= 250 && bg <= 299) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Tăng Đường Huyết Đói Rõ Rệt (250 - 299 mg/dL)', 'fa-chart-line');
+          statusTitle.innerText = "Chọn 1 trong 2 phương án xử trí và loại trừ hiệu ứng Somogyi";
+
+          var incMorn10 = Math.round(doseMorn * 1.1);
+          var incMorn20 = Math.round(doseMorn * 1.2);
+          var actLow = Math.max(2, 3 + actAdd + actRiskAdj);
+          var actHigh = Math.max(3, 4 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p class="font-semibold text-slate-800">Chọn 1 trong 2 cách xử trí sau:</p>' +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-1">' +
+              '<div class="bg-amber-50 p-3 rounded-xl border border-amber-200">' +
+                '<span class="text-xs font-bold text-amber-900"><i class="fa-solid fa-1 mr-1"></i> Cách 1 (Tăng Novomix đơn thuần - Hạn chế mũi tiêm):</span>' +
+                '<p class="text-xs mt-1 text-slate-700">• <b>Tăng 10% – 20% liều Novomix sáng:</b> Tiêm <b class="text-amber-800 text-sm">' + incMorn10 + ' – ' + incMorn20 + ' UI Novomix 30</b> (gốc: ' + doseMorn + ' UI).</p>' +
+                '<p class="text-xs text-slate-600">• Không tiêm Actrapid.</p>' +
+              '</div>' +
+              '<div class="bg-blue-50 p-3 rounded-xl border border-blue-200">' +
+                '<span class="text-xs font-bold text-blue-900"><i class="fa-solid fa-2 mr-1"></i> Cách 2 (Phối hợp tiêm hiệu chỉnh Actrapid):</span>' +
+                '<p class="text-xs mt-1 text-slate-700">• Giữ nguyên <b>' + doseMorn + ' UI Novomix 30 sáng</b>.</p>' +
+                '<p class="text-xs text-slate-700">• Tiêm thêm <b class="text-red-700 text-sm">' + actLow + ' – ' + actHigh + ' UI Actrapid (SC)</b>.</p>' +
+              '</div>' +
+            '</div>';
+
+          orderNutri.innerHTML = '<p>• Ăn sáng bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn sáng 10 – 15 phút.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '11h30 trưa', desc: 'Đo kiểm tra lại trước bữa ăn trưa', critical: true },
+            { time: '18h00 chiều', desc: 'Đo kiểm tra lại trước bữa ăn tối', critical: true },
+            { time: '02h00 – 03h00 sáng đêm kế tiếp', desc: 'KIỂM TRA ĐƯỜNG HUYẾT NỬA ĐÊM ĐỂ PHÂN BIỆT SOMOGYI HAY HIỆN TƯỢNG BÌNH MINH', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• <b>Chú ý:</b> Kiểm tra đường huyết lúc 02h–03h sáng đêm kế tiếp trước khi quyết định tăng liều cử chiều 18h (nếu đường huyết ban đêm &lt; 70 mg/dL là <i>Hiệu ứng Somogyi</i> do dư insulin chiều gây tăng đường huyết phản ứng buổi sáng &rarr; phải giảm liều chiều).</p>';
+
+        } else if (bg >= 300 && bg <= 350) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Ngưỡng Bắt Buộc Xử Trí (300 - 350 mg/dL)', 'fa-fire');
+          statusTitle.innerText = "Bắt buộc phối hợp Actrapid hiệu chỉnh và bù nước ấm";
+
+          var actLow = Math.max(3, 4 + actAdd + actRiskAdj);
+          var actHigh = Math.max(4, 5 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700 text-base">' + doseMorn + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Tiêm bổ sung Actrapid:</b> Tiêm thêm <span class="font-bold text-red-700 text-base">' + actLow + ' – ' + actHigh + ' UI Actrapid</span> (SC) (tiêm ở 2 vị trí cách nhau &ge; 5 cm).</p>' +
+            '<p>• Thử cetone máu/nước tiểu nếu có dấu hiệu nghi ngờ toan hóa.</p>';
+
+          orderNutri.innerHTML = '<p>• <b>Cho uống ngay 300 – 500 mL nước ấm.</b></p>' +
+            '<p>• Ăn sáng bình thường. <b>Thời điểm tiêm:</b> Tiêm trước khi ăn sáng 15 – 20 phút.</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '11h30 trưa', desc: 'BẮT BUỘC đo lại đường huyết trước ăn trưa', critical: true },
+            { time: '18h00 chiều', desc: 'BẮT BUỘC đo lại đường huyết trước ăn tối', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Đánh giá lại toàn bộ tổng liều TDD trong ngày. Cân nhắc chuyển sang phác đồ <b>Basal-Bolus</b> nếu đường huyết dao động lớn.</p>';
+
+        } else if (bg >= 351 && bg <= 400) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Tăng Đường Huyết Nặng (351 - 400 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Tăng đường huyết nặng, cần đánh giá mất nước và ceton";
+
+          var actDose = Math.max(5, 6 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700 text-base">' + doseMorn + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Tiêm bổ sung Actrapid:</b> Tiêm thêm <span class="font-bold text-red-700 text-base">' + actDose + ' UI Actrapid</span> (SC) (tiêm 2 vị trí cách nhau &ge; 5 cm).</p>' +
+            '<p>• Đánh giá nhanh tri giác, dấu mất nước và xét nghiệm ngay ceton máu/nước tiểu.</p>';
+
+          orderNutri.innerHTML = '<p>• <b>Uống 300 – 500 mL nước ấm.</b></p>' +
+            '<p>• Ăn sáng bình thường. <b>Thời điểm tiêm:</b> Tiêm trước khi ăn sáng 15 – 20 phút.</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '11h30 trưa', desc: 'BẮT BUỘC đo lại đường huyết trước ăn trưa', critical: true },
+            { time: '18h00 chiều', desc: 'BẮT BUỘC đo lại đường huyết trước ăn tối', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Tái cấu trúc lại toàn bộ phác đồ insulin trong giờ hành chính (ưu tiên chuyển Basal-Bolus).</p>';
+
+        } else {
+          // > 400 mg/dL or HI
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'BÁO ĐỘNG BIẾN CHỨNG CẤP DKA / HHS (> 400 mg/dL hoặc "HI")', 'fa-skull-crossbones');
+          statusTitle.innerText = "Báo động cấp cứu: Khám ngay tại giường và xét nghiệm DKA/HHS";
+
+          var scAct = Math.min(8, Math.round(weight * 0.1));
+          orderMed.innerHTML = riskAlert + '<div class="p-3 bg-red-100 text-red-950 border border-red-300 rounded-xl space-y-1.5 text-xs md:text-sm">' +
+            '<p class="font-bold text-red-800"><i class="fa-solid fa-bell mr-1"></i> BÁC SĨ KHÁM TẠI GIƯỜNG &amp; XÉT NGHIỆM KHẨN (Cetone, Khí máu, Điện giải/Kali):</p>' +
+            '<p>• <b>Nếu tỉnh táo, không toan:</b> Giữ Novomix sáng ' + doseMorn + ' UI + tiêm Actrapid 0.1 UI/kg SC (~<b>' + scAct + ' UI SC</b>, tối đa 6–8 UI).</p>' +
+            '<p>• <b>Nếu mất nước nặng, toan hóa hoặc máy báo "HI":</b> <b class="text-red-700">TẠM HOÃN Novomix sáng</b>, xử trí bù dịch NaCl 0.9% và Actrapid tĩnh mạch theo phác đồ cấp cứu DKA/HHS.</p>' +
+            '</div>';
+
+          orderNutri.innerHTML = '<p>• <b class="text-red-700">Tạm nhịn ăn (NPO)</b> nếu bệnh nhân lơ mơ, nôn ói hoặc có toan hóa.</p>' +
+            '<p>• Uống nước lọc ấm nếu tỉnh táo hoàn toàn.</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Mỗi 1 – 2 giờ/lần', desc: 'Bấm đường huyết mao mạch liên tục cho đến khi &lt; 300 mg/dL', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• Chuyển sang Tab "3. Cấp Cứu DKA / HHS" trên thanh menu để tính toán truyền dịch và bơm tiêm điện.</p>';
+        }
+
+      // ---------------- CÁC MỐC TIẾP THEO CỦA CA SÁNG (T1, T2, T4) ----------------
+      } else if (currentTimepoint === 't1') {
+        titleMed.innerText = "1. THEO DÕI & XỬ TRÍ SAU ĂN SÁNG (08h30)";
+        titleNutri.innerText = "2. DINH DƯỠNG BỔ SUNG (NẾU BỎ ĂN)";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Đường Huyết Sau Ăn Sáng (08h30)', 'fa-clock');
+        statusTitle.innerText = "Đánh giá sau ăn sáng và dự phòng hạ đường do đỉnh Aspart nhanh";
+
+        if (bg < 70) {
+          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT SỚM SAU ĂN: Áp dụng ngay Quy tắc 15 (uống 15–20g đường nhanh hoặc tiêm TM Glucose 30%).</p>';
+          orderNutri.innerHTML = '<p>• Cho uống thêm 1 ly sữa (150–200 mL) ngay khi tỉnh táo.</p>';
+        } else if (bg > 250) {
+          orderMed.innerHTML = '<p>• Đường huyết sau ăn đang ở đỉnh cao: <b>KHÔNG tiêm thêm Actrapid lúc 08h30</b> để tránh hiện tượng chồng liều (insulin stacking) với mũi sáng vừa tiêm lúc 06h00.</p>';
+          orderNutri.innerHTML = '<p>• Cho uống thêm 300 mL nước lọc ấm; chờ đánh giá lại lúc 11h30 trưa.</p>';
+        } else {
+          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết sau ăn kiểm soát an toàn (' + bg + ' mg/dL). Không cần can thiệp thuốc.</p>';
+          orderNutri.innerHTML = '<p>• <i>Lưu ý:</i> Nếu lúc sáng bệnh nhân đã lỡ tiêm đủ liều Novomix nhưng đột ngột bỏ ăn (&lt; 50% suất), cần cho uống bù ngay 1 ly sữa (15–20g carb) hoặc truyền Glucose 5% 80–100 mL/h.</p>';
+        }
+        orderTimeline.innerHTML = renderTimeline([{ time: '11h30 trưa', desc: 'Đo kiểm tra trước bữa ăn trưa', critical: true }]);
+        orderAdj.innerHTML = '<p>• Tiếp tục theo dõi đến trưa.</p>';
+
+      } else if (currentTimepoint === 't2') {
+        titleMed.innerText = "1. XỬ TRÍ TRƯỚC BỮA ĂN TRƯA (11h30)";
+        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN TRƯA";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'indigo', 'Đường Huyết Trước Ăn Trưa (11h30)', 'fa-utensils');
+        statusTitle.innerText = "Đánh giá hiệu quả mũi sáng và xử trí bữa trưa";
+
+        if (bg < 70) {
+          orderMed.innerHTML = '<p class="text-red-700 font-bold">• Hạ đường huyết trước ăn trưa: Cấp cứu Quy tắc 15 (15–20g đường nhanh) ngay lập tức.</p>';
+          orderNutri.innerHTML = '<p>• Cho ăn bữa trưa ngay khi đường huyết hồi phục &ge; 70 mg/dL.</p>';
+        } else if (bg >= 250) {
+          var lunchAct = (bg >= 300) ? (4 + actAdd + actRiskAdj) : (3 + actAdd + actRiskAdj);
+          orderMed.innerHTML = '<p>• Đường huyết trước ăn trưa tăng cao (' + bg + ' mg/dL): Tiêm bổ sung <b class="text-red-700">' + lunchAct + ' UI Actrapid (SC)</b> trước ăn trưa 15 phút.</p>' +
+            '<p class="text-xs text-slate-500"><i>*Lưu ý: Phác đồ Novomix 2 mũi sáng/chiều không có mũi Novomix cử trưa; chỉ dùng Actrapid đơn thuần nếu cần hiệu chỉnh.</i></p>';
+          orderNutri.innerHTML = '<p>• Uống 300 mL nước ấm; ăn suất cơm trưa bệnh lý tiêu chuẩn.</p>';
+        } else {
+          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết trước ăn trưa đạt mục tiêu an toàn (' + bg + ' mg/dL): Không tiêm thêm insulin.</p>';
+          orderNutri.innerHTML = '<p>• Ăn bữa trưa bình thường theo chế độ đái tháo đường.</p>';
+        }
+        orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đo đường huyết trước bữa ăn tối (Cử chiều)', critical: true }]);
+        orderAdj.innerHTML = '<p>• Nếu đường huyết trưa 11h30 thường xuyên &gt; 250 mg/dL (đặc biệt ở bệnh nhân dùng Corticoid sáng): Cân nhắc thêm 1 mũi Actrapid cố định buổi trưa hoặc chuyển sang Basal-Bolus.</p>';
+
+      } else {
+        titleMed.innerText = "1. CHUYỂN GIAO SANG CỬ CHIỀU 18H00";
+        titleNutri.innerText = "2. CHUẨN BỊ BỮA TỐI";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Mốc 18h00 Chiều', 'fa-arrow-right');
+        statusTitle.innerText = "Đến giờ đánh giá cử chiều trước bữa tối";
+        orderMed.innerHTML = '<p>• Vui lòng bấm chuyển sang Tab <b>"2. Trực Chiều 18h00 (Trước Ăn Tối)"</b> để hệ thống tính toán y lệnh Novomix chiều và Actrapid hiệu chỉnh.</p>' +
+          '<div class="mt-2"><button type="button" onclick="switchTab(\'18h\')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold shadow">Chuyển sang Tab 18h00 ngay &rarr;</button></div>';
+        orderNutri.innerHTML = '<p>• Chuẩn bị suất ăn tối cho bệnh nhân.</p>';
+        orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đánh giá tại Tab Trực Chiều 18h00', critical: true }]);
+        orderAdj.innerHTML = '<p>• Lưu ý kiểm tra xem buổi sáng có chỉ định giảm hay tăng 20% liều Novomix chiều hôm nay không.</p>';
+      }
+    }
+
+    // =========================================================================
+    // 2. PHÁC ĐỒ TRỰC CHIỀU 18H00 (ĐẦY ĐỦ 8 MỨC TẠI T0 + THÍCH ỨNG T1, T2, T4)
+    // =========================================================================
+    function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
+      var statusCard = document.getElementById('status-card');
+      var statusTitle = document.getElementById('status-title');
+      var statusCategory = document.getElementById('status-category');
+      var statusIcon = document.getElementById('status-icon');
+
+      var titleMed = document.getElementById('title-pillar-med');
+      var titleNutri = document.getElementById('title-pillar-nutri');
+      var orderMed = document.getElementById('order-medication');
+      var orderNutri = document.getElementById('order-nutrition');
+      var orderTimeline = document.getElementById('order-timeline');
+      var orderAdj = document.getElementById('order-adjustment');
+
+      var actAdd = (tdd > 40) ? 2 : 0;
+      var actRiskAdj = isHighRisk ? -1 : 0;
+
+      var riskAlert = isHighRisk 
+        ? '<div class="p-2.5 mb-2 bg-amber-100 border border-amber-300 text-amber-950 rounded-xl text-xs font-bold flex items-center">' +
+          '<i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mr-2"></i>' +
+          '<span>ĐÃ BẬT CHẾ ĐỘ NGUY CƠ CAO (Cao tuổi &ge; 65 / Suy thận eGFR &lt; 45 / Ăn kém): Tự động giảm liều và tăng canh đêm.</span>' +
+          '</div>' 
+        : '';
+
+      // ---------------- MỐC T0: 18H00 CHIỀU (ĐẦY ĐỦ 8 MỨC CHI TIẾT) ----------------
+      if (currentTimepoint === 't0') {
+        titleMed.innerText = "1. Y LỆNH THUỐC LÚC 18H00 CHIỀU (Novomix 30 chiều & Actrapid)";
+        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN TỐI & THỜI ĐIỂM TIÊM";
+
+        if (bg < 70) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Hạ Đường Huyết Cấp Cứu (< 70 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Hạ đường huyết cấp cứu trước bữa tối!";
+
+          var safeDose50 = Math.round(dose * 0.5);
+
+          orderMed.innerHTML = riskAlert + '<div class="p-3 bg-red-50 text-red-900 border border-red-200 rounded-xl space-y-1">' +
+            '<p class="font-bold text-red-700"><i class="fa-solid fa-ban mr-1"></i> TẠM NGƯNG NGAY Novomix 30 cử chiều!</p>' +
+            '<p>• <b>Cấp cứu Quy tắc 15:</b> Uống 15–20g đường nhanh (nước đường, sữa có đường) hoặc tiêm tĩnh mạch Glucose 30% 30–50 mL nếu rối loạn tri giác/nôn ói.</p>' +
+            '<p>• <b>Khi đường huyết hồi phục &ge; 70 – 100 mg/dL:</b> ' +
+              (isHighRisk ? '<b class="text-red-700">Ưu tiên NGƯNG HẲN 1 cử chiều (0 UI)</b> do bệnh nhân ăn kém, mệt mỏi, suy gan/thận.' : 
+              'Ưu tiên ngưng hẳn cử chiều nếu ăn kém, hoặc <b>giảm 50% liều Novomix chiều</b>: Tiêm <b class="text-indigo-700">' + safeDose50 + ' UI Novomix 30</b> nếu ăn uống tốt.') +
+            '</p>' +
+            '<p>• Tuyệt đối không tiêm Actrapid.</p></div>';
+
+          orderNutri.innerHTML = '<p>• Cho ăn bữa tối ngay sau khi đường huyết đã hồi phục &ge; 70 mg/dL.</p>' +
+            '<p>• <b class="text-red-700">Thời điểm tiêm:</b> CHỈ TIÊM NOVOMIX SAU KHI BỆNH NHÂN ĐÃ ĂN XONG HOÀN TOÀN (nếu có chỉ định tiêm liều giảm 50%).</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Sau mỗi 15 phút', desc: 'Thử lại đường huyết đến khi &ge; 70 mg/dL', critical: true },
+            { time: '22h00 đêm', desc: 'BẮT BUỘC đo kiểm tra lúc 22h00', critical: true },
+            { time: '02h00 sáng', desc: 'BẮT BUỘC đo kiểm tra lúc 02h00 sáng', critical: true },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng mai', critical: false }
+          ]);
+
+          orderAdj.innerHTML = '<p>• Bác sĩ điều trị xem xét giảm 20% liều Novomix cử chiều thường quy vào ngày hôm sau.</p>';
+
+        } else if (bg >= 70 && bg <= 99) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Vùng Nguy Cơ Hạ Đường Đêm (70 - 99 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Vùng nguy cơ hạ đường huyết ban đêm - Cần giảm liều và tiêm sau ăn";
+
+          var red20 = Math.max(2, Math.round(dose * 0.8));
+          var red30 = Math.max(2, Math.round(dose * 0.7));
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giảm 20% – 30% liều Novomix chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + red30 + ' – ' + red20 + ' UI Novomix 30</span> (liều gốc: ' + dose + ' UI).</p>' +
+            '<p>• Không tiêm Actrapid.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn bữa tối đảm bảo đủ lượng tinh bột.</p>' +
+            '<p>• <b class="text-amber-800">Thời điểm tiêm:</b> TIÊM NGAY SAU KHI ĂN XONG (tránh tụt đường huyết sớm nếu bỏ dở bữa ăn).</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 đêm', desc: 'BẮT BUỘC đo lại đường huyết lúc 22h00', critical: true },
+            { time: '02h00 sáng', desc: isHighRisk ? 'BẮT BUỘC ĐO lúc 02h00 sáng vì người bệnh cao tuổi / suy giảm chức năng thận' : 'Đo lúc 02h00 sáng nếu người bệnh cao tuổi hoặc có suy giảm chức năng thận', critical: isHighRisk },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng mai', critical: false }
+          ]);
+
+          orderAdj.innerHTML = '<p>• Ghi nhận giảm liều cử chiều tạm thời để bảo vệ an toàn ban đêm.</p>';
+
+        } else if (bg >= 100 && bg <= 139) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Thấp Hơn Mục Tiêu Nội Trú (100 - 139 mg/dL)', 'fa-circle-info');
+          statusTitle.innerText = "Thấp hơn mục tiêu nội trú - Lưu ý giảm nhẹ ở người cao tuổi/suy thận";
+
+          var red10 = Math.max(2, Math.round(dose * 0.9));
+          var red20 = Math.max(2, Math.round(dose * 0.8));
+
+          orderMed.innerHTML = riskAlert + (isHighRisk ? 
+            '<p>• <b>Người cao tuổi (&ge; 65), suy thận (eGFR &lt; 45), ăn ít:</b> Giảm nhẹ 10% – 20% liều Novomix chiều &rarr; Tiêm <span class="font-bold text-indigo-700 text-base">' + red20 + ' – ' + red10 + ' UI Novomix 30</span> (gốc: ' + dose + ' UI).</p>' : 
+            '<p>• <b>Bệnh nhân trẻ, ăn uống tốt:</b> Giữ nguyên 100% liều Novomix chiều &rarr; Tiêm <span class="font-bold text-indigo-700 text-base">' + dose + ' UI Novomix 30</span>.</p>') +
+            '<p>• Không tiêm Actrapid.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn uống bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm ngay trước khi ăn tối.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 đêm', desc: 'Không cần đo 22h00 nếu lâm sàng ổn định, ăn hết suất', critical: false },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói lúc 06h00 sáng mai', critical: false }
+          ]);
+          orderAdj.innerHTML = '<p>• Duy trì theo dõi phác đồ hiện tại.</p>';
+
+        } else if (bg >= 140 && bg <= 249) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'emerald', 'Đạt Dải An Toàn Nội Trú (140 - 249 mg/dL)', 'fa-circle-check');
+          statusTitle.innerText = "Đạt dải an toàn nội trú trước bữa ăn tối";
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên 100% liều Novomix chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + dose + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Không tiêm thêm Actrapid</b>, không can thiệp cấp thời.</p>';
+
+          orderNutri.innerHTML = '<p>• Ăn uống đủ khẩu phần thường quy.</p><p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn tối 5 – 10 phút.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 &amp; 02h00 sáng', desc: 'KHÔNG CẦN ĐO lúc 22h00 hay 02h00 sáng', critical: false },
+            { time: '06h00 sáng mai', desc: 'Đo kiểm tra lại vào lúc 06h00 sáng mai', critical: false }
+          ]);
+          orderAdj.innerHTML = '<p>• Giữ nguyên phác đồ điều trị hiện tại.</p>';
+
+        } else if (bg >= 250 && bg <= 299) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Tăng Đường Huyết Vừa (250 - 299 mg/dL)', 'fa-chart-line');
+          statusTitle.innerText = "Tăng đường huyết vừa - Chọn 1 trong 2 phương án xử trí";
+
+          var inc10 = Math.round(dose * 1.1);
+          var inc20 = Math.round(dose * 1.2);
+          var actLow = Math.max(2, 3 + actAdd + actRiskAdj);
+          var actHigh = Math.max(3, 4 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p class="font-semibold text-slate-800">Bác sĩ trực chọn 1 trong 2 cách sau:</p>' +
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-1">' +
+              '<div class="bg-indigo-50 p-3 rounded-xl border border-indigo-200">' +
+                '<span class="text-xs font-bold text-indigo-900"><i class="fa-solid fa-1 mr-1"></i> Cách 1 (Hạn chế mũi tiêm - Tăng Novomix đơn thuần):</span>' +
+                '<p class="text-xs mt-1 text-slate-700">• <b>Tăng 10% – 20% liều Novomix chiều:</b> Tiêm <b class="text-indigo-800 text-sm">' + inc10 + ' – ' + inc20 + ' UI Novomix 30</b> (liều gốc: ' + dose + ' UI).</p>' +
+                '<p class="text-xs text-slate-600">• Không tiêm Actrapid.</p>' +
+              '</div>' +
+              '<div class="bg-blue-50 p-3 rounded-xl border border-blue-200">' +
+                '<span class="text-xs font-bold text-blue-900"><i class="fa-solid fa-2 mr-1"></i> Cách 2 (Tiêm hiệu chỉnh Actrapid):</span>' +
+                '<p class="text-xs mt-1 text-slate-700">• Giữ nguyên <b>' + dose + ' UI Novomix 30 chiều</b>.</p>' +
+                '<p class="text-xs text-slate-700">• Tiêm thêm <b class="text-red-700 text-sm">' + actLow + ' – ' + actHigh + ' UI Actrapid (SC)</b>.</p>' +
+              '</div>' +
+            '</div>';
+
+          orderNutri.innerHTML = '<p>• Ăn uống bình thường.</p><p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn tối 10 – 15 phút.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 đêm', desc: 'Không bắt buộc đo 22h00 trừ khi bệnh nhân có triệu chứng lâm sàng bất thường', critical: false },
+            { time: '06h00 sáng mai', desc: 'Đo kiểm tra lúc 06h00 sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Đánh giá lại khẩu phần ăn buổi chiều hoặc liều Novomix cử sáng nếu tăng lặp lại.</p>';
+
+        } else if (bg >= 300 && bg <= 350) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Ngưỡng Bắt Buộc Xử Trí (300 - 350 mg/dL)', 'fa-fire');
+          statusTitle.innerText = "Ngưỡng bắt buộc xử trí phối hợp Actrapid và bù nước";
+
+          var actLow = Math.max(3, 4 + actAdd + actRiskAdj);
+          var actHigh = Math.max(4, 5 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên liều Novomix chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + dose + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Tiêm bổ sung Actrapid:</b> Tiêm thêm <span class="font-bold text-red-700 text-base">' + actLow + ' – ' + actHigh + ' UI Actrapid</span> (SC).</p>' +
+            '<p>• Thử cetone máu/nước tiểu nếu có dấu hiệu nghi ngờ toan hóa.</p>';
+
+          orderNutri.innerHTML = '<p>• <b>Cho uống 300 – 500 mL nước ấm.</b></p>' +
+            '<p>• Ăn bữa tối bình thường.</p>' +
+            '<p>• <b>Thời điểm tiêm:</b> Tiêm trước khi ăn tối 15 – 20 phút <i>(tiêm Actrapid và Novomix ở 2 vị trí cách nhau &ge; 5 cm)</i>.</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 đêm', desc: 'BẮT BUỘC đo lại lúc 22h00 đêm', critical: true },
+            { time: '02h00 sáng', desc: 'Đo lúc 02h00 sáng nếu kết quả lúc 22h00 vẫn &gt; 250 mg/dL hoặc tụt &lt; 140 mg/dL', critical: false },
+            { time: '06h00 sáng mai', desc: 'Đo lúc 06h00 sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Khi có kết quả đo lúc 22h00 đêm, bấm sang nút <b>"22h00 (Trước ngủ)"</b> trên thanh thời điểm để nhận hướng dẫn xử trí tiếp theo.</p>';
+
+        } else if (bg >= 351 && bg <= 400) {
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Tăng Đường Huyết Nặng (351 - 400 mg/dL)', 'fa-triangle-exclamation');
+          statusTitle.innerText = "Tăng đường huyết nặng - Thử ngay ceton và theo dõi sát đêm";
+
+          var actDose = Math.max(5, 6 + actAdd + actRiskAdj);
+
+          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên liều Novomix chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + dose + ' UI Novomix 30</span> (SC).</p>' +
+            '<p>• <b>Tiêm bổ sung Actrapid:</b> Tiêm thêm <span class="font-bold text-red-700 text-base">' + actDose + ' UI Actrapid</span> (SC).</p>' +
+            '<p>• Đánh giá nhanh tri giác, dấu mất nước và <b>thử ngay cetone máu/nước tiểu</b>.</p>';
+
+          orderNutri.innerHTML = '<p>• <b>Uống 300 – 500 mL nước ấm.</b></p>' +
+            '<p>• Ăn bữa tối bình thường. <b>Thời điểm tiêm:</b> Tiêm trước ăn tối 15 – 20 phút (tiêm 2 vị trí khác nhau cách nhau &ge; 5 cm).</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '22h00 đêm', desc: 'BẮT BUỘC đo lại lúc 22h00 đêm', critical: true },
+            { time: '02h00 sáng', desc: 'BẮT BUỘC đo lại lúc 02h00 sáng', critical: true },
+            { time: '06h00 sáng mai', desc: 'Đo lúc 06h00 sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Bàn giao bác sĩ điều trị tái cấu trúc phác đồ (chuyển Basal-Bolus) vào sáng hôm sau.</p>';
+
+        } else {
+          // > 400 mg/dL or HI
+          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'BÁO ĐỘNG BIẾN CHỨNG CẤP DKA / HHS (> 400 mg/dL hoặc "HI")', 'fa-skull-crossbones');
+          statusTitle.innerText = "Bác sĩ trực khám ngay tại giường - Tầm soát DKA/HHS khẩn";
+
+          var scAct = Math.min(8, Math.round(weight * 0.1));
+          var ivBolus = Math.min(6, Math.max(4, Math.round(weight * 0.1)));
+
+          orderMed.innerHTML = riskAlert + '<div class="p-3 bg-red-100 text-red-950 border border-red-300 rounded-xl space-y-1.5 text-xs md:text-sm">' +
+            '<p class="font-bold text-red-800"><i class="fa-solid fa-bell mr-1"></i> BÁC SĨ TRỰC KHÁM NGAY TẠI GIƯỜNG (Tri giác, mất nước, thở Kussmaul):</p>' +
+            '<p>• <b>Xét nghiệm khẩn:</b> Cetone máu/nước tiểu, Khí máu động mạch, Điện giải đồ (đặc biệt là Kali), Đường huyết tĩnh mạch.</p>' +
+            '<p>• <b>Xử trí cấp thời:</b></p>' +
+            '<p class="pl-2">- <i>Nếu tỉnh táo, không toan:</i> Giữ nguyên Novomix ' + dose + ' UI + tiêm <b>Actrapid 0.1 UI/kg SC (~' + scAct + ' UI SC</b>, tối đa 6–8 UI SC).</p>' +
+            '<p class="pl-2">- <i>Nếu mất nước nặng hoặc máy hiện "HI":</i> <b class="text-red-700">Tạm hoãn Novomix cử chiều</b>, xem xét <b>Actrapid tiêm tĩnh mạch (IV) 0.1 UI/kg (~' + ivBolus + ' UI IV bolus khi Kali &ge; 3.3 mEq/L)</b> kết hợp truyền dịch bù thể tích tuần hoàn bằng NaCl 0.9%.</p>' +
+            '<p class="pl-2">- <i>Nếu xác định DKA hoặc HHS:</i> <b>Ngưng Novomix</b>, chuyển sang Tab Cấp Cứu DKA/HHS truyền Actrapid tĩnh mạch liên tục qua bơm tiêm điện (0.05 – 0.1 UI/kg/h).</p>' +
+            '</div>';
+
+          orderNutri.innerHTML = '<p>• <b class="text-red-700">Tạm nhịn ăn (NPO)</b> nếu bệnh nhân lơ mơ, buồn nôn, nôn ói hoặc có toan ceton.</p>' +
+            '<p>• Chỉ cho uống nước lọc ấm nếu bệnh nhân hoàn toàn tỉnh táo và nuốt an toàn.</p>';
+
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Mỗi 1 – 2 giờ/lần', desc: 'Bắt buộc theo dõi sát: Bấm đường huyết mỗi 1 – 2 giờ/lần cho đến khi hạ &lt; 300 mg/dL', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• Nếu có toan chuyển hóa hoặc tăng áp lực thẩm thấu, bấm chuyển ngay sang Tab "3. Cấp Cứu DKA / HHS".</p>';
+        }
+
+      // ---------------- CÁC MỐC TIẾP THEO CỦA CA TRỰC ĐÊM (T1, T2, T4) ----------------
+      } else if (currentTimepoint === 't1') {
+        titleMed.innerText = "1. THEO DÕI SAU BỮA ĂN TỐI (20h30)";
+        titleNutri.innerText = "2. XỬ TRÍ NẾU BỆNH NHÂN BỎ ĂN SAU TIÊM";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Đường Huyết Sau Ăn Tối (20h30)', 'fa-clock');
+        statusTitle.innerText = "Đánh giá sau ăn tối & phòng ngừa hạ đường huyết sớm";
+
+        if (bg < 70) {
+          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT: Cho uống ngay 15–20g đường nhanh (nước đường hoặc sữa có đường) hoặc tiêm TM Glucose 30%.</p>';
+          orderNutri.innerHTML = '<p>• Cho ăn bù ngay 1 ly sữa hoặc cháo loãng khi tỉnh.</p>';
+        } else if (bg > 250) {
+          orderMed.innerHTML = '<p>• Đường huyết sau ăn cao: <b>Chưa tiêm thêm Actrapid lúc 20h30</b> (vì mũi Novomix/Actrapid lúc 18h00 đang còn tác dụng, tiêm sớm sẽ gây chồng liều tụt đường lúc nửa đêm).</p>';
+          orderNutri.innerHTML = '<p>• Cho uống 300 mL nước lọc ấm; chờ đánh giá lại tại mốc <b>22h00 (Trước ngủ)</b>.</p>';
+        } else {
+          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết sau ăn tối ổn định (' + bg + ' mg/dL). Không can thiệp thuốc.</p>';
+          orderNutri.innerHTML = '<p>• <b>Lưu ý quan trọng:</b> Nếu lúc 18h00 đã lỡ tiêm đủ Novomix nhưng bệnh nhân bỏ ăn tối (&lt; 50% suất): Bắt buộc cho uống bù ngay 1 ly sữa (150–200 mL) hoặc truyền Glucose 5% tốc độ 80–100 mL/h trong 3–4 giờ đầu.</p>';
+        }
+        orderTimeline.innerHTML = renderTimeline([{ time: '22h00 đêm', desc: 'Đo kiểm tra lại trước giờ đi ngủ', critical: true }]);
+        orderAdj.innerHTML = '<p>• Theo dõi sát đến mốc 22h00 đêm.</p>';
+
+      } else if (currentTimepoint === 't2') {
+        titleMed.innerText = "1. XỬ TRÍ ĐƯỜNG HUYẾT TRƯỚC GIỜ ĐI NGỦ (22h00)";
+        titleNutri.innerText = "2. BỮA PHỤ ĐÊM PHÒNG HẠ ĐƯỜNG HUYẾT";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'indigo', 'Đường Huyết Lúc 22h00 Đêm', 'fa-bed');
+        statusTitle.innerText = "Đánh giá trước ngủ - Canh đỉnh tác dụng của Protamine nền";
+
+        if (bg < 70) {
+          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT LÚC 22H00: Xử trí Quy tắc 15 ngay lập tức (15–20g đường nhanh uống hoặc Glucose 30% TM).</p>';
+          orderNutri.innerHTML = '<p class="text-red-700 font-bold">• Sau khi đường huyết lên &ge; 100 mg/dL: Bắt buộc cho ăn thêm bữa phụ có tinh bột phức hợp + đạm (1 hộp sữa + 2 bánh quy) để giữ đường huyết suốt đêm.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Sau 15 phút', desc: 'Thử lại đến khi &ge; 100 mg/dL', critical: true },
+            { time: '02h00 sáng', desc: 'BẮT BUỘC đo kiểm tra lúc nửa đêm', critical: true },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• Bàn giao giảm 20–30% liều Novomix chiều ngày mai.</p>';
+        } else if (bg >= 70 && bg < 140) {
+          orderMed.innerHTML = '<p class="text-amber-800 font-bold">• Cảnh báo: Đường huyết lúc 22h00 dưới 140 mg/dL (' + bg + ' mg/dL) có nguy cơ tụt đường huyết vào lúc 02h00 sáng khi thành phần Protamine đạt đỉnh!</p>' +
+            '<p>• Không tiêm bất kỳ loại insulin nào.</p>';
+          orderNutri.innerHTML = '<p class="text-amber-900 font-bold">• Cho bệnh nhân uống ngay 1 ly sữa ấm (150–200 mL) hoặc ăn nhẹ trước khi đi ngủ.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '02h00 sáng', desc: 'BẮT BUỘC đo lại lúc 02h00 sáng (vì lúc 22h00 &lt; 140 mg/dL)', critical: true },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Cân nhắc giảm nhẹ 10–15% liều Novomix chiều hôm sau.</p>';
+        } else if (bg >= 140 && bg <= 250) {
+          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết 22h00 đạt dải an toàn cho giấc ngủ đêm (' + bg + ' mg/dL): Không tiêm thêm insulin.</p>';
+          orderNutri.innerHTML = '<p>• Không cần ăn thêm bữa phụ. Cho người bệnh đi ngủ.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '02h00 sáng', desc: isHighRisk ? 'Đo kiểm tra nếu bệnh nhân có nguy cơ cao' : 'Không cần đo 02h00 sáng (vì 22h00 đã nằm trong khoảng 140 - 250 mg/dL)', critical: isHighRisk },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói lúc 06h00 sáng mai', critical: false }
+          ]);
+          orderAdj.innerHTML = '<p>• Đáp ứng tốt sau hiệu chỉnh buổi chiều.</p>';
+        } else {
+          // BG > 250 lúc 22h00
+          var nightAct = (bg >= 350) ? 4 : ((bg >= 300) ? 3 : 2);
+          orderMed.innerHTML = '<p>• Đường huyết lúc 22h00 vẫn còn cao &gt; 250 mg/dL (' + bg + ' mg/dL):' +
+            '<br>• Chỉ tiêm liều hiệu chỉnh thận trọng ban đêm: <b class="text-red-700">' + nightAct + ' UI Actrapid (SC)</b> (giảm 50% so với liều hiệu chỉnh ban ngày để tránh hạ đường huyết lúc 02h–03h sáng).</p>';
+          orderNutri.innerHTML = '<p>• Cho uống 200–300 mL nước ấm; không ăn thêm tinh bột.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: '02h00 sáng', desc: 'BẮT BUỘC đo lúc 02h00 sáng (vì lúc 22h00 vẫn &gt; 250 mg/dL)', critical: true },
+            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng mai', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p>• Theo dõi sát lúc 02h00 sáng.</p>';
+        }
+
+      } else {
+        // T4: 02h00 Sáng
+        titleMed.innerText = "1. XỬ TRÍ ĐƯỜNG HUYẾT NỬA ĐÊM (02h00 SÁNG)";
+        titleNutri.innerText = "2. XỬ TRÍ DINH DƯỠNG NỬA ĐÊM";
+        setCardStyle(statusCard, statusCategory, statusIcon, 'purple', 'Đường Huyết Lúc 02h00 Sáng', 'fa-moon');
+        statusTitle.innerText = "Kiểm tra an toàn lúc nửa đêm & phân biệt Somogyi";
+
+        if (bg < 70) {
+          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT ĐÊM (02h00): Áp dụng Quy tắc 15 ngay lập tức (uống nước đường ấm hoặc tiêm TM Glucose 30% nếu ngủ gà/lơ mơ).</p>';
+          orderNutri.innerHTML = '<p>• Cho uống thêm sữa ấm khi tỉnh táo.</p>';
+          orderTimeline.innerHTML = renderTimeline([
+            { time: 'Sau 15 phút', desc: 'Đo lại đến khi &ge; 70 - 100 mg/dL', critical: true },
+            { time: '06h00 sáng', desc: 'Bắt buộc đo lại lúc 06h00 sáng', critical: true }
+          ]);
+          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• ĐÃ XÁC ĐỊNH HIỆU ỨNG SOMOGYI / DƯ INSULIN NỀN BAN ĐÊM: Bắt buộc giảm 20–30% liều Novomix chiều (18h00) của ngày hôm nay!</p>';
+        } else {
+          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết lúc 02h00 sáng ở mức an toàn (' + bg + ' mg/dL). Không tiêm insulin lúc nửa đêm (trừ khi &gt; 350 mg/dL).</p>';
+          orderNutri.innerHTML = '<p>• Để người bệnh tiếp tục ngủ yên giấc đến sáng.</p>';
+          orderTimeline.innerHTML = renderTimeline([{ time: '06h00 sáng', desc: 'Đo đường huyết đói lúc 06h00 sáng', critical: true }]);
+          orderAdj.innerHTML = '<p>• Nếu 02h00 sáng bình thường/cao và 06h00 sáng tiếp tục tăng cao &rarr; Xác định là <i>Hiện tượng Bình minh (Dawn Phenomenon)</i>, cho phép tăng 10–20% liều Novomix cử chiều 18h00.</p>';
+        }
+      }
+    }
+
+    // =========================================================================
+    // 3. PHÁC ĐỒ CẤP CỨU DKA / HHS (THÍCH ỨNG TỪ T0 ĐẾN T4+)
     // =========================================================================
     function calculateDKA(bg, weight) {
       var k = parseFloat(document.getElementById('k-slider').value);
@@ -616,8 +1181,6 @@
       document.getElementById('out-ketone').innerText = ketone.toFixed(1) + ' mmol/L';
 
       var isResolved = (bg < 200) && (ph > 7.30) && (hco3 >= 18) && (ketone < 0.6);
-      
-      // Clinical differentiation: T0 vs Post-T0
       var isInitialNonDka = (currentTimepoint === 't0') && (ketone < 3.0) && (ph > 7.30) && (hco3 > 18) && (osmEff <= 320);
       var isTreatedDkaTransition = (currentTimepoint !== 't0') && (ketone < 3.0) && !isResolved;
 
@@ -630,7 +1193,6 @@
       var nonDkaGrid = document.getElementById('non-dka-fallback-grid');
 
       if (isInitialNonDka) {
-        // Chỉ khi T0 mới coi là Tăng đường huyết đơn thuần không cấp cứu
         classEl.innerText = "TĂNG ĐƯỜNG HUYẾT ĐƠN THUẦN (T0)";
         classEl.className = "text-xs font-bold text-amber-700 mt-1";
         statusTitle = "Tăng Đường Huyết Đơn Thuần Lúc Vào Viện (Không có DKA/HHS)";
@@ -677,7 +1239,7 @@
           classEl.className = "text-xs font-bold text-red-600 mt-1";
         }
 
-        // ---------------- TRỤC 1: BÙ DỊCH (THÍCH ỨNG THEO CHECKPOINT) ----------------
+        // Trục 1: Bù dịch theo từng mốc T0 -> T4+
         var fluidOrder = document.getElementById('dka-fluid-order');
         var fluidBadge = document.getElementById('dka-fluid-badge');
         var nextFluidType = naCorr >= 135 ? "NaCl 0.45%" : "NaCl 0.9%";
@@ -687,7 +1249,7 @@
         if (bg < 250 && !isResolved) {
           dextroseText = '<div class="p-2.5 bg-amber-50 text-amber-950 border border-amber-300 rounded-lg text-xs md:text-sm font-semibold">' +
             '<i class="fa-solid fa-bell text-amber-600 mr-1.5"></i> <b>BẮT BUỘC BỔ SUNG CHAI GLUCOSE 5% HOẶC 10%:</b> Do đường huyết đã &lt; 250 mg/dL nhưng Ceton máu vẫn chưa sạch (' + ketone.toFixed(1) + ' mmol/L). ' +
-            'Mắc song song chai Glucose 5% tốc độ 150 – 250 mL/h để giữ đường huyết 150–200 mg/dL, tiếp tục duy trì insulin xóa toan.' +
+            'Mắc song song chai Glucose 5% tốc độ 150 – 250 mL/h để giữ đường huyết 150–200 mg/dL trong khi tiếp tục truyền insulin xóa toan.' +
             '</div>';
         }
 
@@ -695,23 +1257,21 @@
           fluidBadge.innerText = "Hồi sức giờ đầu (T0)";
           var hour1Rate = hasCHF ? "250 – 500 mL/h (Suy tim/thận)" : (Math.round(weight * 15) + " – " + Math.round(weight * 20) + " mL/h (Chuẩn: 1000 mL/h)");
           fluidOrder.innerHTML = '<p>• <b>Giờ đầu tiên (0 – 60 phút):</b> Truyền tĩnh mạch <b>NaCl 0.9% tốc độ ' + hour1Rate + '</b>.</p>' +
-            '<p>• <i>Mục tiêu:</i> Phục hồi nhanh thể tích tuần hoàn hiệu dụng trước khi xét nghiệm điện giải đồ hoàn tất.</p>' + dextroseText;
+            '<p>• <i>Mục tiêu:</i> Phục hồi nhanh thể tích tuần hoàn và tưới máu thận.</p>' + dextroseText;
         } else if (currentTimepoint === 't1') {
           fluidBadge.innerText = "Duy trì Giờ thứ 2 (T1)";
           fluidOrder.innerHTML = '<p>• <b>Chuyển sang dịch duy trì giờ thứ 2:</b> Dựa vào Natri hiệu chỉnh (' + naCorr.toFixed(1) + ' mEq/L) &rarr; Sử dụng <b>' + nextFluidType + ' tốc độ ' + fluidRateMaintenance + '</b>.</p>' +
-            '<p>• Đánh giá lại dấu véo da, mạch, huyết áp và lượng nước tiểu sau giờ bù dịch đầu tiên.</p>' + dextroseText;
+            '<p>• Đánh giá lại huyết động, dấu mất nước và lượng nước tiểu.</p>' + dextroseText;
         } else if (currentTimepoint === 't2') {
           fluidBadge.innerText = "Hiệu chỉnh Giờ thứ 3–4 (T2)";
-          fluidOrder.innerHTML = '<p>• <b>Tiếp tục dịch duy trì theo điện giải đồ mới:</b> Sử dụng <b>' + nextFluidType + ' tốc độ ' + fluidRateMaintenance + '</b>.</p>' +
-            '<p>• Nếu Natri hiệu chỉnh có xu hướng tăng (&ge; 145 mEq/L), ưu tiên giữ NaCl 0.45% để hạ áp lực thẩm thấu dần dần.</p>' + dextroseText;
+          fluidOrder.innerHTML = '<p>• <b>Tiếp tục dịch duy trì theo điện giải đồ mới:</b> Sử dụng <b>' + nextFluidType + ' tốc độ ' + fluidRateMaintenance + '</b>.</p>' + dextroseText;
         } else {
-          // t4+
           fluidBadge.innerText = "Giai đoạn chuyển tiếp (T4+)";
           fluidOrder.innerHTML = '<p>• <b>Duy trì thể tích tuần hoàn ổn định:</b> ' + nextFluidType + ' tốc độ ' + (hasCHF ? '100 – 150 mL/h' : '150 – 250 mL/h') + '.</p>' +
-            (isResolved ? '<p class="text-emerald-700 font-bold">• Đã thoát DKA: Cho bệnh nhân uống nước tự do theo nhu cầu; chuẩn bị rút dần các đường truyền dịch.</p>' : '') + dextroseText;
+            (isResolved ? '<p class="text-emerald-700 font-bold">• Đã thoát DKA: Cho bệnh nhân uống nước và ăn lại đường miệng; giảm dần dịch truyền tĩnh mạch.</p>' : '') + dextroseText;
         }
 
-        // ---------------- TRỤC 2: BÙ KALI (CHỐT CHẶN AN TOÀN) ----------------
+        // Trục 2: Bù Kali
         var kCard = document.getElementById('dka-k-card');
         var kOrder = document.getElementById('dka-k-order');
         var kBadge = document.getElementById('k-badge-status');
@@ -725,7 +1285,7 @@
 
           kOrder.innerHTML = '<div class="text-red-950 font-bold space-y-1">' +
             '<p class="text-base"><i class="fa-solid fa-ban text-red-600 mr-1.5"></i> TUYỆT ĐỐI TẠM HOÃN TRUYỀN INSULIN!</p>' +
-            '<p>• Nồng độ Kali máu hiện tại là ' + k.toFixed(1) + ' mmol/L (&lt; 3.5). Bắt đầu truyền insulin lúc này có thể gây ngừng tim do hạ Kali máu cấp!</p>' +
+            '<p>• Nồng độ Kali máu hiện tại là ' + k.toFixed(1) + ' mmol/L (&lt; 3.5). Truyền insulin lúc này có nguy cơ gây ngừng tim do hạ Kali máu cấp!</p>' +
             '<p>• <b>Y lệnh bù Kali khẩn:</b> Bù KCl tĩnh mạch 10 – 20 mmol/h cho đến khi đo lại K+ &ge; 3.5 mmol/L mới được mở bơm tiêm điện Insulin.</p>' +
             '</div>';
         } else if (k >= 3.5 && k <= 5.0) {
@@ -734,7 +1294,7 @@
           kBadge.innerText = "An Toàn Cho Phép";
 
           kOrder.innerHTML = '<p>• Kali máu ' + k.toFixed(1) + ' mmol/L: <b>Đạt ngưỡng an toàn để truyền Insulin.</b></p>' +
-            '<p>• <b>Y lệnh bù duy trì:</b> Pha <b>20 – 30 mmol KCl</b> (10 – 15 mL KCl 10%) vào mỗi chai 500 mL hoặc 1000 mL dịch truyền để giữ Kali máu trong khoảng 4.0 – 5.0 mmol/L.</p>';
+            '<p>• <b>Y lệnh bù duy trì:</b> Pha <b>20 – 30 mmol KCl</b> (10 – 15 mL KCl 10%) vào mỗi lít dịch truyền để giữ Kali máu trong khoảng 4.0 – 5.0 mmol/L.</p>';
         } else {
           kCard.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm";
           kBadge.className = "text-xs bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-semibold";
@@ -744,7 +1304,7 @@
             '<p>• <b>Không pha thêm Kali</b> vào dịch truyền lúc này. Kiểm tra lại điện giải đồ sau mỗi 2 giờ.</p>';
         }
 
-        // ---------------- TRỤC 3: INSULIN BƠM TIÊM ĐIỆN (THÍCH ỨNG THEO CHECKPOINT) ----------------
+        // Trục 3: Insulin BTE
         var insulinOrder = document.getElementById('dka-insulin-order');
         var rateBadge = document.getElementById('insulin-infusion-rate-badge');
 
@@ -755,12 +1315,14 @@
         } else if (isResolved) {
           rateBadge.innerText = "CHUẨN BỊ RÚT BTE";
           rateBadge.className = "text-xs bg-emerald-600 text-white px-2 py-0.5 rounded font-bold";
+          var estTdd = Math.round(weight * 0.4);
+          var estBasal = Math.round(estTdd * 0.5);
           insulinOrder.innerHTML = '<div class="p-3 bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl space-y-1.5 text-xs md:text-sm">' +
             '<p class="font-bold text-emerald-800 text-base"><i class="fa-solid fa-circle-check mr-1.5"></i> ĐÃ ĐẠT TIÊU CHUẨN KẾT THÚC DKA (Resolution Criteria):</p>' +
             '<p>• Glucose &lt; 200 mg/dL, pH &gt; 7.30, HCO3- &ge; 18 mEq/L và &beta;-hydroxybutyrate &lt; 0.6 mmol/L.</p>' +
             '<p>• <b>QUY TRÌNH GỐI ĐẦU CHUYỂN TIÊM DƯỚI DA (SC):</b></p>' +
-            '<p>1. Cho người bệnh ăn lại đường miệng nếu tỉnh táo, hết nôn ói.</p>' +
-            '<p>2. Tiêm mũi Insulin nền (Basal) hoặc Novomix dưới da <b>trước khi ngừng bơm tiêm điện ít nhất 1 – 2 giờ</b> (với insulin nhanh/Novomix) hoặc <b>2 – 4 giờ</b> (với Glargine/Degludec).</p>' +
+            '<p>1. Cho người bệnh ăn đường miệng nếu tỉnh táo và không còn nôn ói.</p>' +
+            '<p>2. <b>Tiêm mũi Insulin dưới da gối đầu TRƯỚC KHI tắt bơm tiêm điện ít nhất 1 – 2 giờ</b> (với insulin nhanh/Novomix) hoặc <b>2 – 4 giờ</b> (với Glargine/Degludec). <i>(Gợi ý TDD ước tính 0.4 UI/kg ~ ' + estTdd + ' UI/ngày &rarr; Liều nền Basal ~ ' + estBasal + ' UI)</i>.</p>' +
             '<p class="text-red-700 font-semibold">• <i>Cảnh báo: Tuyệt đối không ngắt BTE đột ngột khi chưa tiêm gối đầu SC vì sẽ gây toan ceton dội ngược!</i></p>' +
             '</div>';
         } else {
@@ -771,13 +1333,13 @@
 
           var checkpointInsulinNote = "";
           if (currentTimepoint === 't0') {
-            checkpointInsulinNote = '<p>• <b>Khởi đầu:</b> Tốc độ cố định 0.1 UI/kg/h (' + insulinRate.toFixed(1) + ' mL/h qua BTE 50 UI/50 mL). Sau khi đảm bảo bù dịch đủ trong giờ đầu.</p>';
+            checkpointInsulinNote = '<p>• <b>Khởi đầu:</b> Tốc độ cố định 0.1 UI/kg/h (' + insulinRate.toFixed(1) + ' mL/h qua BTE 50 UI/50 mL).</p>';
           } else if (currentTimepoint === 't1') {
-            checkpointInsulinNote = '<p>• <b>Hiệu chỉnh sau 1 giờ:</b> So sánh với đường huyết lúc T0. Nếu tốc độ hạ &lt; 50 mg/dL/giờ: Tăng gấp đôi tốc độ lên <b class="text-indigo-800">' + (insulinRate * 2).toFixed(1) + ' mL/h</b>. Nếu hạ 50–75 mg/dL/h: Tiếp tục duy trì ' + insulinRate.toFixed(1) + ' mL/h.</p>';
+            checkpointInsulinNote = '<p>• <b>Đánh giá động học sau 1 giờ:</b> Mục tiêu đường huyết giảm 50–75 mg/dL/h. Nếu hạ &lt; 50 mg/dL/h: Tăng gấp đôi tốc độ truyền lên <b class="text-indigo-800">' + (insulinRate * 2).toFixed(1) + ' mL/h</b>.</p>';
           } else if (currentTimepoint === 't2') {
-            checkpointInsulinNote = '<p>• <b>Đánh giá giờ thứ 2–3:</b> Tiếp tục duy trì tốc độ hạ 50–75 mg/dL/h. ' + (bg < 250 ? 'Do BG &lt; 250 mg/dL, tự động giảm tốc độ còn 0.02–0.05 UI/kg/h (' + insulinRate.toFixed(1) + ' mL/h) để tránh hạ đường huyết.' : '') + '</p>';
+            checkpointInsulinNote = '<p>• <b>Đánh giá giờ thứ 2–3:</b> Duy trì tốc độ hạ 50–75 mg/dL/h. ' + (bg < 250 ? '<b class="text-amber-800">Do BG đã &lt; 250 mg/dL, giảm tốc độ BTE xuống còn 0.02–0.05 UI/kg/h (' + insulinRate.toFixed(1) + ' mL/h)</b> kết hợp truyền Glucose 5%.' : '') + '</p>';
           } else {
-            checkpointInsulinNote = '<p>• <b>Giai đoạn T4+:</b> Tiếp tục truyền tốc độ thấp để xóa sạch ceton máu (mục tiêu Ceton &lt; 0.6 mmol/L). Không ngưng insulin sớm ngay cả khi đường huyết đã bình thường.</p>';
+            checkpointInsulinNote = '<p>• <b>Giai đoạn T4+:</b> Giữ tốc độ truyền thấp (' + insulinRate.toFixed(1) + ' mL/h) song song với dịch Glucose 5% để xóa sạch Ceton máu về &lt; 0.6 mmol/L.</p>';
           }
 
           insulinOrder.innerHTML = '<p>• <b>Pha chuẩn bơm tiêm điện (BTE):</b> <b>50 UI Actrapid</b> + NaCl 0.9% vừa đủ <b>50 mL</b> (1 mL = 1 UI).</p>' +
@@ -785,14 +1347,14 @@
             checkpointInsulinNote;
         }
 
-        // ---------------- TRỤC 4: KẾ HOẠCH THEO DÕI TIẾP THEO ----------------
+        // Trục 4: Kế hoạch theo dõi
         var monitorOrder = document.getElementById('dka-monitoring-order');
         var timelineList = [];
         if (currentTimepoint === 't0') {
           timelineList = [
-            { time: 'Sau 1 giờ (T1)', desc: 'Bấm đường huyết mao mạch để đánh giá tốc độ hạ đường (mục tiêu 50-75 mg/dL/h)', critical: true },
+            { time: 'Sau 1 giờ (T1)', desc: 'Bấm đường huyết mao mạch đánh giá tốc độ hạ 50-75 mg/dL/h', critical: true },
             { time: 'Sau 2 giờ (T2)', desc: 'Làm lại Điện giải đồ (Kali, Natri) và Khí máu động mạch', critical: true },
-            { time: 'Sau 4 giờ (T4)', desc: 'Đo lại Ceton máu mao mạch', critical: false }
+            { time: 'Sau 4 giờ (T4)', desc: 'Đo lại Ceton máu mao mạch (&beta;-hydroxybutyrate)', critical: false }
           ];
         } else if (currentTimepoint === 't1') {
           timelineList = [
@@ -801,13 +1363,13 @@
           ];
         } else if (currentTimepoint === 't2') {
           timelineList = [
-            { time: 'Mỗi 1 giờ/lần', desc: 'Bấm đường huyết mao mạch', critical: true },
-            { time: 'Đến mốc 4 giờ (T4)', desc: 'Đo lại Ceton máu mao mạch và Khí máu kiểm tra tiêu chuẩn khỏi DKA', critical: true }
+            { time: 'Mỗi 1 giờ/lần', desc: 'Bấm đường huyết mao mạch tại giường', critical: true },
+            { time: 'Đến mốc 4 giờ (T4)', desc: 'Đo lại Ceton máu mao mạch và Khí máu đánh giá thoái triển toan', critical: true }
           ];
         } else {
           timelineList = [
-            { time: 'Mỗi 2 giờ/lần', desc: 'Bấm đường huyết mao mạch khi đường huyết đã ổn định', critical: true },
-            { time: 'Trước khi ngưng BTE', desc: 'Đo lại Ceton máu khẳng định &lt; 0.6 mmol/L và gối đầu tiêm dưới da', critical: true }
+            { time: 'Mỗi 1 – 2 giờ/lần', desc: 'Bấm đường huyết mao mạch duy trì mục tiêu 150 - 200 mg/dL', critical: true },
+            { time: 'Trước khi ngưng BTE', desc: 'Đảm bảo Ceton &lt; 0.6 mmol/L, HCO3- &ge; 18 và đã tiêm gối đầu SC trước 1-2 giờ', critical: true }
           ];
         }
         monitorOrder.innerHTML = renderTimeline(timelineList);
@@ -818,321 +1380,6 @@
       var statusIcon = document.getElementById('status-icon');
       setCardStyle(statusCard, statusCat, statusIcon, statusTheme, classEl.innerText, statusIconClass);
       document.getElementById('status-title').innerText = statusTitle;
-    }
-
-    // =========================================================================
-    // 2. INPATIENT 06H SHIFT CALCULATION (ADAPTIVE TO CHECKPOINTS)
-    // =========================================================================
-    function calculateInpatient06h(bg, weight, doseMorn, doseEve, tdd, isHighRisk) {
-      var statusCard = document.getElementById('status-card');
-      var statusTitle = document.getElementById('status-title');
-      var statusCategory = document.getElementById('status-category');
-      var statusIcon = document.getElementById('status-icon');
-
-      var titleMed = document.getElementById('title-pillar-med');
-      var titleNutri = document.getElementById('title-pillar-nutri');
-      var orderMed = document.getElementById('order-medication');
-      var orderNutri = document.getElementById('order-nutrition');
-      var orderTimeline = document.getElementById('order-timeline');
-      var orderAdj = document.getElementById('order-adjustment');
-
-      var actAdd = (tdd > 40) ? 2 : 0;
-      var actRiskAdj = isHighRisk ? -1 : 0;
-
-      var riskAlert = isHighRisk 
-        ? '<div class="p-2.5 mb-2 bg-amber-100 border border-amber-300 text-amber-950 rounded-xl text-xs font-bold flex items-center">' +
-          '<i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mr-2"></i>' +
-          '<span>ĐÃ BẬT CHẾ ĐỘ NGUY CƠ CAO (Cao tuổi / Suy thận eGFR &lt; 45 / Ăn kém).</span>' +
-          '</div>' 
-        : '';
-
-      // T0: Lúc 06h00 (Trước ăn sáng)
-      if (currentTimepoint === 't0') {
-        titleMed.innerText = "1. Y LỆNH THUỐC CỬ SÁNG (Novomix 30 sáng & Actrapid)";
-        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN SÁNG & THỜI ĐIỂM TIÊM";
-
-        if (bg < 70) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Hạ Đường Huyết Đói Cấp Cứu (< 70 mg/dL)', 'fa-triangle-exclamation');
-          statusTitle.innerText = "Tụt đường huyết ban đêm do dư insulin nền cử chiều!";
-
-          var safeMorn = Math.round(doseMorn * 0.5);
-          var nextEve = Math.max(2, Math.round(doseEve * 0.8));
-
-          orderMed.innerHTML = riskAlert + '<p class="font-bold text-red-700">• TẠM NGƯNG Novomix 30 sáng!</p>' +
-            '<p>• Xử trí Quy tắc 15 (15–20g đường nhanh hoặc Glucose 30% TM nếu lơ mơ).</p>' +
-            '<p>• Khi đường huyết hồi phục &ge; 70–100 mg/dL: ' + (isHighRisk ? '<b class="text-red-700">Ngưng hẳn cử sáng (0 UI)</b>' : 'Cân nhắc tiêm giảm 50%: <span class="font-bold text-amber-700">' + safeMorn + ' UI Novomix</span> (sau ăn).') + '</p>';
-
-          orderNutri.innerHTML = '<p>• Cho ăn sáng ngay khi đường huyết đã hồi phục &ge; 70 mg/dL.</p>' +
-            '<p>• <b>Thời điểm tiêm:</b> BẮT BUỘC tiêm sau khi đã ăn sáng xong.</p>';
-
-          orderTimeline.innerHTML = renderTimeline([
-            { time: 'Sau mỗi 15 phút', desc: 'Bấm lại đến khi &ge; 70 mg/dL (cập nhật lại thanh trượt)', critical: true },
-            { time: '11h30 trưa', desc: 'BẮT BUỘC đo kiểm tra trước ăn trưa', critical: true },
-            { time: '18h00 chiều', desc: 'Đo kiểm tra trước ăn tối', critical: true }
-          ]);
-
-          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• BẮT BUỘC GIẢM 20% LIỀU CHIỀU HÔM NAY: Giảm từ ' + doseEve + ' UI xuống còn <span class="text-indigo-800 font-bold text-base">' + nextEve + ' UI Novomix chiều (18h00)</span> để phòng ngừa tụt đường đêm tới!</p>';
-        } else if (bg >= 70 && bg <= 99) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Thấp Sát Ngưỡng Hạ Đường (70 - 99 mg/dL)', 'fa-triangle-exclamation');
-          statusTitle.innerText = "Đường huyết đói thấp, cảnh báo nguy cơ hạ đường đêm";
-
-          var redMorn = isHighRisk ? Math.max(2, Math.round(doseMorn * 0.75)) : Math.max(2, Math.round(doseMorn * 0.8));
-          var nextEve = Math.max(2, Math.round(doseEve * 0.85));
-
-          orderMed.innerHTML = riskAlert + '<p>• <b>Giảm ' + (isHighRisk ? '25%' : '20%') + ' liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700">' + redMorn + ' UI</span> (liều gốc: ' + doseMorn + ' UI).</p>';
-          orderNutri.innerHTML = '<p>• Ăn bữa sáng đủ tinh bột. <b>Thời điểm tiêm:</b> Tiêm ngay sau khi ăn sáng xong.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '11h30 trưa', desc: 'Đo kiểm tra trước bữa ăn trưa', critical: false },
-            { time: '18h00 chiều', desc: 'Đo kiểm tra trước bữa ăn tối', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p>• <b>Điều chỉnh liều cử chiều (18h00):</b> Giảm 10% – 15% xuống còn <b>' + nextEve + ' UI</b>.</p>';
-        } else if (bg >= 100 && bg <= 180) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'emerald', 'Đạt Chuẩn Mục Tiêu Nội Viện (100 - 180 mg/dL)', 'fa-circle-check');
-          statusTitle.innerText = "Đường huyết đói đạt chuẩn, duy trì phác đồ";
-          orderMed.innerHTML = riskAlert + '<p>• <b>Giữ nguyên 100% liều Novomix sáng:</b> Tiêm <span class="font-bold text-amber-700">' + doseMorn + ' UI</span> (SC).</p>';
-          orderNutri.innerHTML = '<p>• Ăn sáng bình thường. Tiêm trước ăn 5 – 10 phút.</p>';
-          orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đo kiểm tra trước ăn tối', critical: false }]);
-          orderAdj.innerHTML = '<p>• Phác đồ cử sáng và chiều hôm qua đạt hiệu quả tốt, tiếp tục duy trì.</p>';
-        } else {
-          // BG > 180
-          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Tăng Đường Huyết Đói (' + bg + ' mg/dL)', 'fa-chart-line');
-          statusTitle.innerText = "Cần tiêm hiệu chỉnh Actrapid sáng";
-          var actDose = bg >= 300 ? (4 + actAdd + actRiskAdj) : (bg >= 250 ? 3 : 2);
-          orderMed.innerHTML = riskAlert + '<p>• <b>Novomix 30 sáng:</b> Giữ nguyên ' + doseMorn + ' UI + Tiêm thêm <b class="text-red-700">' + actDose + ' UI Actrapid (SC)</b>.</p>';
-          orderNutri.innerHTML = '<p>• Uống nước ấm. Tiêm trước ăn sáng 15 phút (2 vị trí tiêm khác nhau).</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '11h30 trưa', desc: 'BẮT BUỘC đo lại trước ăn trưa', critical: true },
-            { time: '18h00 chiều', desc: 'Đo lại trước ăn tối', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p>• Đánh giá lại: Nếu FBG cao liên tiếp &ge; 2 ngày thì tăng liều Novomix cử chiều 18h00.</p>';
-        }
-
-      } else if (currentTimepoint === 't1') {
-        // T1: 08h30 (Sau ăn sáng)
-        titleMed.innerText = "1. THEO DÕI & XỬ TRÍ SAU ĂN SÁNG (08h30)";
-        titleNutri.innerText = "2. DINH DƯỠNG PHỤ & NƯỚC UỐNG";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Đường Huyết Sau Ăn Sáng (08h30)', 'fa-clock');
-        statusTitle.innerText = "Đánh giá đỉnh đường huyết sau ăn sáng";
-
-        if (bg < 70) {
-          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT SAU ĂN: Cho uống 1 ly nước đường ngay lập tức.</p>';
-          orderNutri.innerHTML = '<p>• Cho ăn thêm bánh quy hoặc 1 ly sữa ấm.</p>';
-        } else if (bg > 250) {
-          orderMed.innerHTML = '<p>• Đường huyết sau ăn tăng cao: Chưa tiêm thêm insulin vội (tránh chồng liều với Novomix vừa tiêm lúc 06h).</p>';
-          orderNutri.innerHTML = '<p>• Cho bệnh nhân uống thêm 300 mL nước lọc ấm; không ăn vặt giữa buổi.</p>';
-        } else {
-          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết sau ăn đạt mục tiêu an toàn (&lt; 200 mg/dL). Tiếp tục theo dõi.</p>';
-          orderNutri.innerHTML = '<p>• Bệnh nhân sinh hoạt bình thường.</p>';
-        }
-        orderTimeline.innerHTML = renderTimeline([{ time: '11h30 trưa', desc: 'Đo đường huyết trước bữa ăn trưa', critical: true }]);
-        orderAdj.innerHTML = '<p>• Ghi nhận đỉnh đường huyết sau ăn vào hồ sơ theo dõi ca trực.</p>';
-
-      } else if (currentTimepoint === 't2') {
-        // T2: 11h30 (Trước ăn trưa)
-        titleMed.innerText = "1. Y LỆNH TRƯỚC BỮA ĂN TRƯA (11h30)";
-        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN TRƯA";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'indigo', 'Kiểm Tra Trước Ăn Trưa (11h30)', 'fa-utensils');
-        statusTitle.innerText = "Đánh giá đường huyết trước bữa trưa";
-
-        if (bg < 70) {
-          orderMed.innerHTML = '<p class="text-red-700 font-bold">• Hạ đường huyết trước ăn trưa: Xử trí Quy tắc 15 ngay.</p>';
-          orderNutri.innerHTML = '<p>• Cho ăn bữa trưa ngay khi đường huyết hồi phục &ge; 70 mg/dL.</p>';
-        } else if (bg >= 250) {
-          var corrAct = (bg >= 300) ? 4 : 2;
-          orderMed.innerHTML = '<p>• Đường huyết trước trưa cao: Tiêm hiệu chỉnh <b class="text-red-700">' + corrAct + ' UI Actrapid (SC)</b> trước ăn trưa 15 phút (Không tiêm Novomix cử trưa).</p>';
-          orderNutri.innerHTML = '<p>• Ăn suất trưa theo chế độ đái tháo đường.</p>';
-        } else {
-          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết trước trưa đạt dải an toàn (70 - 200 mg/dL): KHÔNG tiêm insulin.</p>';
-          orderNutri.innerHTML = '<p>• Cho bệnh nhân ăn bữa trưa bình thường.</p>';
-        }
-        orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Đo đường huyết trước bữa ăn tối', critical: true }]);
-        orderAdj.innerHTML = '<p>• Nếu đường huyết trước trưa thường xuyên tăng cao: Cân nhắc chuyển sang phác đồ Basal-Bolus 3 mũi nhanh.</p>';
-
-      } else {
-        // T4: 18h00 (Trước ăn tối)
-        titleMed.innerText = "1. KẾT THÚC CHU KỲ SÁNG - CHUYỂN TIẾP CỬ CHIỀU (18h00)";
-        titleNutri.innerText = "2. CHUYỂN TIẾP BỮA TỐI";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Mốc 18h00 Chiều', 'fa-arrow-right');
-        statusTitle.innerText = "Kết thúc chu kỳ theo dõi buổi sáng";
-        orderMed.innerHTML = '<p>• Đã đến thời điểm cử chiều 18h00. Vui lòng chuyển sang Tab <b>"2. Trực Chiều 18h00"</b> trên thanh menu để nhận y lệnh chính xác cho mũi tiêm chiều.</p>';
-        orderNutri.innerHTML = '<p>• Chuẩn bị bữa ăn tối cho người bệnh.</p>';
-        orderTimeline.innerHTML = renderTimeline([{ time: '18h00 chiều', desc: 'Bấm chuyển sang Tab Trực Chiều 18h00', critical: true }]);
-        orderAdj.innerHTML = '<p>• Đánh giá tổng kết dao động đường huyết ban ngày.</p>';
-      }
-    }
-
-    // =========================================================================
-    // 3. INPATIENT 18H SHIFT CALCULATION (ADAPTIVE TO CHECKPOINTS)
-    // =========================================================================
-    function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
-      var statusCard = document.getElementById('status-card');
-      var statusTitle = document.getElementById('status-title');
-      var statusCategory = document.getElementById('status-category');
-      var statusIcon = document.getElementById('status-icon');
-
-      var titleMed = document.getElementById('title-pillar-med');
-      var titleNutri = document.getElementById('title-pillar-nutri');
-      var orderMed = document.getElementById('order-medication');
-      var orderNutri = document.getElementById('order-nutrition');
-      var orderTimeline = document.getElementById('order-timeline');
-      var orderAdj = document.getElementById('order-adjustment');
-
-      var actAdd = (tdd > 40) ? 2 : 0;
-      var actRiskAdj = isHighRisk ? -1 : 0;
-
-      var riskAlert = isHighRisk 
-        ? '<div class="p-2.5 mb-2 bg-amber-100 border border-amber-300 text-amber-950 rounded-xl text-xs font-bold flex items-center">' +
-          '<i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mr-2"></i>' +
-          '<span>ĐÃ BẬT CHẾ ĐỘ NGUY CƠ CAO (Cao tuổi / Suy thận eGFR &lt; 45 / Ăn kém).</span>' +
-          '</div>' 
-        : '';
-
-      // T0: Lúc 18h00 (Trước ăn tối)
-      if (currentTimepoint === 't0') {
-        titleMed.innerText = "1. Y LỆNH THUỐC CỬ CHIỀU (Novomix 30 chiều & Actrapid)";
-        titleNutri.innerText = "2. KẾ HOẠCH BỮA ĂN TỐI & THỜI ĐIỂM TIÊM";
-
-        if (bg < 70) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'red', 'Hạ Đường Huyết Cấp Cứu (< 70 mg/dL)', 'fa-triangle-exclamation');
-          statusTitle.innerText = "Báo động: Nguy cơ tụt đường huyết nặng ban đêm!";
-
-          var safeDose = Math.round(dose * 0.5);
-          var recText = isHighRisk ? 
-            '<b class="text-red-700 font-bold text-sm">Ưu tiên NGƯNG HẲN cử chiều (0 UI)</b>.' : 
-            'Cân nhắc tiêm giảm 50% liều: <span class="font-bold text-indigo-700">' + safeDose + ' UI Novomix 30</span> (sau ăn).';
-
-          orderMed.innerHTML = riskAlert + '<div class="p-3 bg-red-50 text-red-900 border border-red-200 rounded-xl space-y-1">' +
-            '<p class="font-bold text-red-700"><i class="fa-solid fa-ban mr-1"></i> TẠM NGƯNG NGAY mũi Novomix 30 cử chiều (18h00)!</p>' +
-            '<p>• Cấp cứu Quy tắc 15 (15–20g đường nhanh uống hoặc Glucose 30% TM nếu lơ mơ).</p>' +
-            '<p>• Khi đường huyết hồi phục &ge; 70–100 mg/dL: ' + recText + '</p>' +
-            '</div>';
-
-          orderNutri.innerHTML = '<p>• Cho ăn tối ngay sau khi đường huyết đo lại &ge; 70 mg/dL.</p>' +
-            '<p>• <b>Thời điểm tiêm:</b> BẮT BUỘC chỉ tiêm Novomix sau khi bệnh nhân đã ăn xong hoàn toàn.</p>';
-
-          orderTimeline.innerHTML = renderTimeline([
-            { time: 'Sau mỗi 15 phút', desc: 'Bấm lại đường huyết mao mạch đến khi &ge; 70 mg/dL', critical: true },
-            { time: '22h00 đêm', desc: 'BẮT BUỘC đo kiểm tra để canh đỉnh tác dụng của Protamine nền', critical: true },
-            { time: '02h00 sáng', desc: 'BẮT BUỘC đo kiểm tra ngừa hạ đường huyết lúc nửa đêm', critical: true }
-          ]);
-
-          orderAdj.innerHTML = '<p>• Giảm 20% liều Novomix cử chiều từ ngày mai để tránh tái phát.</p>';
-        } else if (bg >= 70 && bg <= 99) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Vùng Nguy Cơ Hạ Đường Đêm (70 - 99 mg/dL)', 'fa-triangle-exclamation');
-          statusTitle.innerText = "Đường huyết thấp sát ngưỡng an toàn trước ăn tối";
-
-          var redDose = isHighRisk ? Math.max(2, Math.round(dose * 0.7)) : Math.max(2, Math.round(dose * 0.75));
-          orderMed.innerHTML = riskAlert + '<p>• <b>Giảm ' + (isHighRisk ? '30%' : '25%') + ' liều Novomix chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + redDose + ' UI</span> (gốc: ' + dose + ' UI).</p>';
-          orderNutri.innerHTML = '<p>• Ăn bữa tối đủ tinh bột. <b>Thời điểm tiêm:</b> TIÊM NGAY SAU KHI ĂN TỐI XONG.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '22h00 đêm', desc: 'BẮT BUỘC đo lại đường huyết trước khi ngủ', critical: true },
-            { time: '02h00 sáng', desc: isHighRisk ? 'BẮT BUỘC ĐO (do có nguy cơ cao)' : 'Đo nếu lúc 22h00 < 140 mg/dL', critical: isHighRisk }
-          ]);
-          orderAdj.innerHTML = '<p>• Ghi nhận giảm liều chiều vào hồ sơ theo dõi ca trực.</p>';
-        } else if (bg >= 100 && bg <= 249) {
-          setCardStyle(statusCard, statusCategory, statusIcon, 'emerald', 'Đạt Dải Mục Tiêu An Toàn Nội Trú (100 - 249 mg/dL)', 'fa-circle-check');
-          statusTitle.innerText = "Đạt mục tiêu kiểm soát an toàn của ADA 2026";
-          var curDose = (isHighRisk && bg < 140) ? Math.max(2, Math.round(dose * 0.85)) : dose;
-          orderMed.innerHTML = riskAlert + '<p>• <b>Novomix 30 chiều:</b> Tiêm <span class="font-bold text-indigo-700 text-base">' + curDose + ' UI</span> (SC). Không tiêm Actrapid.</p>';
-          orderNutri.innerHTML = '<p>• Ăn tối bình thường. Tiêm trước ăn tối 5 – 10 phút.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '22h00 đêm', desc: isHighRisk ? 'Đo kiểm tra do có nguy cơ cao' : 'Không bắt buộc đo nếu ăn hết suất và tỉnh táo', critical: isHighRisk },
-            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng hôm sau', critical: false }
-          ]);
-          orderAdj.innerHTML = '<p>• Phác đồ cử chiều đang tối ưu, tiếp tục duy trì.</p>';
-        } else {
-          // BG >= 250
-          setCardStyle(statusCard, statusCategory, statusIcon, 'amber', 'Tăng Đường Huyết Chiều (' + bg + ' mg/dL)', 'fa-fire');
-          statusTitle.innerText = "Cần phối hợp Novomix và Actrapid hiệu chỉnh";
-          var actDose = bg >= 351 ? (6 + actAdd + actRiskAdj) : (bg >= 300 ? (4 + actAdd + actRiskAdj) : (3 + actAdd + actRiskAdj));
-          orderMed.innerHTML = riskAlert + '<p>• <b>Novomix 30:</b> Giữ nguyên ' + dose + ' UI + Tiêm thêm <b class="text-red-700 text-base">' + actDose + ' UI Actrapid (SC)</b> (cách nhau &ge; 5 cm).</p>';
-          orderNutri.innerHTML = '<p>• Uống 300 – 500 mL nước ấm. Tiêm trước ăn tối 15 – 20 phút.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '22h00 đêm', desc: 'BẮT BUỘC đo lại đường huyết kiểm tra sau hiệu chỉnh', critical: true },
-            { time: '02h00 sáng', desc: 'Đo thêm nếu lúc 22h00 vẫn > 250 hoặc < 140 mg/dL', critical: false },
-            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng hôm sau', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p>• Đánh giá toan ceton nếu đường huyết &gt; 350 mg/dL kèm thở nhanh, mệt mỏi.</p>';
-        }
-
-      } else if (currentTimepoint === 't1') {
-        // T1: 20h30 (Sau ăn tối)
-        titleMed.innerText = "1. THEO DÕI SAU ĂN TỐI (20h30)";
-        titleNutri.innerText = "2. DINH DƯỠNG & THEO DÕI";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'blue', 'Đường Huyết Sau Ăn Tối (20h30)', 'fa-clock');
-        statusTitle.innerText = "Đánh giá đường huyết sau ăn tối";
-
-        if (bg < 70) {
-          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU HẠ ĐƯỜNG HUYẾT: Cho uống ngay 1 hộp sữa có đường hoặc nước đường ấm.</p>';
-          orderNutri.innerHTML = '<p>• Cho ăn thêm bánh mì hoặc bánh quy giòn.</p>';
-        } else if (bg > 250) {
-          orderMed.innerHTML = '<p>• Đường huyết sau ăn cao: Chưa tiêm thêm insulin lúc này (tránh chồng liều lên Novomix).</p>';
-          orderNutri.innerHTML = '<p>• Cho uống nước lọc ấm; chuẩn bị đo lại lúc 22h00 để quyết định tiêm bổ sung.</p>';
-        } else {
-          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết ổn định (&lt; 200 mg/dL). Tiếp tục theo dõi trước ngủ.</p>';
-          orderNutri.innerHTML = '<p>• Người bệnh nghỉ ngơi thoải mái.</p>';
-        }
-        orderTimeline.innerHTML = renderTimeline([{ time: '22h00 đêm', desc: 'Bắt buộc đo kiểm tra trước giờ đi ngủ', critical: true }]);
-        orderAdj.innerHTML = '<p>• Chuẩn bị ca trực đêm.</p>';
-
-      } else if (currentTimepoint === 't2') {
-        // T2: 22h00 (Trước khi đi ngủ) - RẤT QUAN TRỌNG
-        titleMed.innerText = "1. XỬ TRÍ TRƯỚC GIỜ ĐI NGỦ (22h00)";
-        titleNutri.innerText = "2. BỮA PHỤ ĐÊM & AN TOÀN GIẤC NGỦ";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'indigo', 'Đường Huyết Trước Ngủ (22h00)', 'fa-bed');
-        statusTitle.innerText = "Chốt chặn phòng ngừa hạ đường huyết ban đêm";
-
-        if (bg < 100) {
-          orderMed.innerHTML = '<p class="text-amber-800 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> NGUY CƠ HẠ ĐƯỜNG ĐÊM RẤT CAO (Đường huyết &lt; 100 mg/dL trước ngủ):</p>' +
-            '<p>• Tuyệt đối KHÔNG tiêm thêm bất kỳ loại insulin nào.</p>';
-          orderNutri.innerHTML = '<p class="text-red-700 font-bold">• BẮT BUỘC ĂN BỮA PHỤ ĐÊM: Cho người bệnh uống 1 ly sữa ấm (150 mL) hoặc 2-3 chiếc bánh quy trước khi ngủ.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '02h00 sáng', desc: 'BẮT BUỘC ĐO LÚC NỬA ĐÊM để canh hạ đường huyết tái phát', critical: true },
-            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói buổi sáng', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• Bác sĩ điều trị ngày mai bắt buộc giảm liều Novomix cử chiều 18h00.</p>';
-        } else if (bg >= 100 && bg <= 249) {
-          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đạt dải an toàn trước khi ngủ (100 - 249 mg/dL): Không can thiệp thuốc.</p>';
-          orderNutri.innerHTML = '<p>• Không cần ăn thêm nếu không thấy đói cồn cào. Bệnh nhân ngủ yên giấc.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '02h00 sáng', desc: isHighRisk ? 'Đo nếu bệnh nhân cao tuổi/suy thận' : 'Không cần bấm nếu lâm sàng hoàn toàn ổn định', critical: isHighRisk },
-            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói buổi sáng', critical: false }
-          ]);
-          orderAdj.innerHTML = '<p>• Phác đồ an toàn cho ban đêm.</p>';
-        } else {
-          // BG >= 250 lúc 22h00
-          var bedAct = (bg >= 350) ? 4 : 2;
-          orderMed.innerHTML = '<p>• Đường huyết 22h00 còn cao: Tiêm sửa sai liều thận trọng <b class="text-red-700">' + bedAct + ' UI Actrapid (SC)</b> (không tiêm liều cao để tránh tụt đường lúc 02h-03h sáng).</p>';
-          orderNutri.innerHTML = '<p>• Uống 150 mL nước ấm trước khi đi ngủ.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: '02h00 sáng', desc: 'BẮT BUỘC đo kiểm tra sau mũi tiêm hiệu chỉnh lúc 22h00', critical: true },
-            { time: '06h00 sáng mai', desc: 'Đo đường huyết đói buổi sáng', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p>• Đánh giá lại liều Novomix chiều không đủ bao phủ bữa tối.</p>';
-        }
-
-      } else {
-        // T4: 02h00 (Nửa đêm)
-        titleMed.innerText = "1. XỬ TRÍ LÚC NỬA ĐÊM (02h00 Sáng)";
-        titleNutri.innerText = "2. XỬ TRÍ KHẨN & DINH DƯỠNG ĐÊM";
-        setCardStyle(statusCard, statusCategory, statusIcon, 'purple', 'Đường Huyết Lúc 02h00 Sáng', 'fa-moon');
-        statusTitle.innerText = "Kiểm tra đỉnh tác dụng Protamine nền";
-
-        if (bg < 70) {
-          orderMed.innerHTML = '<p class="text-red-700 font-bold">• CẤP CỨU TỤT ĐƯỜNG HUYẾT ĐÊM: Đánh thức người bệnh, cho uống ngay nước đường ấm hoặc truyền Glucose 10%/30% nếu lơ mơ.</p>';
-          orderNutri.innerHTML = '<p>• Giữ ấm người bệnh, cho ăn nhẹ sau khi tỉnh.</p>';
-          orderTimeline.innerHTML = renderTimeline([
-            { time: 'Sau 15 phút', desc: 'Đo lại đến khi &ge; 70 mg/dL', critical: true },
-            { time: '06h00 sáng', desc: 'Bắt buộc đo đường huyết đói', critical: true }
-          ]);
-          orderAdj.innerHTML = '<p class="text-red-700 font-bold">• XÁC NHẬN DƯ LIỀU NỀN CHIỀU: Giảm ngay 20-30% liều Novomix 18h hôm sau!</p>';
-        } else {
-          orderMed.innerHTML = '<p class="text-emerald-700 font-semibold">• Đường huyết nửa đêm an toàn (' + bg + ' mg/dL). Để người bệnh tiếp tục ngủ.</p>';
-          orderNutri.innerHTML = '<p>• Không can thiệp dinh dưỡng.</p>';
-          orderTimeline.innerHTML = renderTimeline([{ time: '06h00 sáng mai', desc: 'Đo đường huyết đói chuẩn bị cử sáng', critical: false }]);
-          orderAdj.innerHTML = '<p>• Yên tâm theo dõi đến ca trực sáng mai.</p>';
-        }
-      }
     }
 
     // Helper: Style Card
