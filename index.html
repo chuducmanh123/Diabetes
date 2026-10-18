@@ -190,6 +190,22 @@
               <input type="range" id="hco3-slider" min="2" max="30" step="1" value="12" class="w-full accent-blue-600">
             </div>
 
+            <!-- Beta-hydroxybutyrate (Ceton máu) Input -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="ketone-slider" class="text-sm font-semibold text-slate-700">Ceton Máu (&beta;-hydroxybutyrate):</label>
+                <div>
+                  <span id="ketone-val" class="text-base font-bold text-red-700">4.5</span> <span class="text-xs text-slate-500">mmol/L</span>
+                </div>
+              </div>
+              <input type="range" id="ketone-slider" min="0.1" max="10.0" step="0.1" value="4.5" class="w-full accent-red-600">
+              <div class="flex justify-between text-[11px] text-slate-400 px-1 mt-0.5">
+                <span class="text-emerald-600 font-semibold">&lt; 0.6 (Khỏi bệnh)</span>
+                <span>0.6 - 2.9 (Cảnh báo)</span>
+                <span class="text-red-600 font-semibold">&ge; 3.0 (Xác định DKA)</span>
+              </div>
+            </div>
+
             <!-- Comorbid: CHF/ESRD -->
             <label class="flex items-start space-x-2.5 cursor-pointer bg-red-50/60 p-2.5 rounded-lg border border-red-200">
               <input type="checkbox" id="chf-modifier" class="mt-0.5 rounded text-red-600 focus:ring-red-500 w-4 h-4">
@@ -224,17 +240,21 @@
         <!-- Calculated Indexes Card (DKA/HHS Mode Only) -->
         <div id="dka-indexes-card" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hidden">
           <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chỉ Số Sinh Hóa Hiệu Chỉnh Tức Thì</h4>
-          <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
             <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
-              <div class="text-[11px] text-slate-500">Natri Hiệu Chỉnh (Na_corr)</div>
+              <div class="text-[11px] text-slate-500">Natri Hiệu Chỉnh</div>
               <div id="out-nacorr" class="text-base font-bold text-slate-800">--</div>
             </div>
             <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
-              <div class="text-[11px] text-slate-500">Áp Lực Thẩm Thấu Hiệu Dụng</div>
+              <div class="text-[11px] text-slate-500">ALTT Hiệu Dụng</div>
               <div id="out-osmeff" class="text-base font-bold text-slate-800">--</div>
             </div>
             <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
-              <div class="text-[11px] text-slate-500">Phân Tầng Biến Chứng</div>
+              <div class="text-[11px] text-slate-500">&beta;-hydroxybutyrate</div>
+              <div id="out-ketone" class="text-base font-bold text-red-600">4.5 mmol/L</div>
+            </div>
+            <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+              <div class="text-[11px] text-slate-500">Phân Tầng Lâm Sàng</div>
               <div id="out-classification" class="text-xs font-bold text-red-600 mt-1">--</div>
             </div>
           </div>
@@ -752,58 +772,86 @@ function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
       }
     }
 
-    function calculateDKA(bg, weight) {
+function calculateDKA(bg, weight) {
       var k = parseFloat(document.getElementById('k-slider').value);
       var na = parseFloat(document.getElementById('na-slider').value);
       var ph = parseFloat(document.getElementById('ph-slider').value);
       var hco3 = parseFloat(document.getElementById('hco3-slider').value);
+      var ketone = parseFloat(document.getElementById('ketone-slider').value);
       var hasCHF = document.getElementById('chf-modifier').checked;
 
+      // 1. Tính toán Natri hiệu chỉnh và Áp lực thẩm thấu hiệu dụng
       var naCorr = na + 0.016 * (bg - 100);
       var osmEff = 2 * na + (bg / 18);
 
       document.getElementById('out-nacorr').innerText = naCorr.toFixed(1) + ' mEq/L';
       document.getElementById('out-osmeff').innerText = osmEff.toFixed(1) + ' mOsm/kg';
+      document.getElementById('out-ketone').innerText = ketone.toFixed(1) + ' mmol/L';
 
+      // 2. Đánh giá Tiêu chuẩn khỏi bệnh (Resolution of DKA)
+      var isResolved = (bg < 200) && (ph > 7.30) && (hco3 >= 18) && (ketone < 0.6);
+
+      // 3. Phân tầng và chẩn đoán biến chứng
       var classEl = document.getElementById('out-classification');
       var statusTitle = "";
-      if (bg >= 600 && osmEff > 320 && ph >= 7.30) {
-        classEl.innerText = "HHS (Tăng Áp Lực Thẩm Thấu)";
+      var statusTheme = "red";
+      var statusIconClass = "fa-truck-medical";
+
+      if (isResolved) {
+        classEl.innerText = "ĐÃ ĐẠT TIÊU CHUẨN KHỎI DKA";
+        classEl.className = "text-xs font-bold text-emerald-600 mt-1";
+        statusTitle = "Bệnh nhân đã thoát toan ceton (Resolution of DKA) - Chuẩn bị chuyển SC";
+        statusTheme = "emerald";
+        statusIconClass = "fa-circle-check";
+      } else if (bg >= 600 && osmEff > 320 && ketone < 3.0 && ph >= 7.30) {
+        classEl.innerText = "HHS ĐƠN THUẦN";
+        classEl.className = "text-xs font-bold text-purple-700 mt-1";
         statusTitle = "Hội chứng Tăng Áp Lực Thẩm Thấu Máu (HHS)";
-      } else if (ph < 7.00 || hco3 < 10) {
-        classEl.innerText = "DKA Mức Độ NẶNG";
-        statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Nặng";
-      } else if (ph < 7.25 || hco3 < 15) {
-        classEl.innerText = "DKA Mức Độ VỪA";
-        statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Vừa";
-      } else if (ph <= 7.30 || hco3 <= 18) {
-        classEl.innerText = "DKA Mức Độ NHẸ";
-        statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Nhẹ";
+      } else if (bg >= 600 && osmEff > 320 && ketone >= 3.0) {
+        classEl.innerText = "THỂ KẾT HỢP DKA + HHS";
+        classEl.className = "text-xs font-bold text-red-700 mt-1";
+        statusTitle = "Hôn mê hỗn hợp: Toan Ceton kèm Tăng Áp Lực Thẩm Thấu";
+      } else if (ketone >= 3.0 || (ph <= 7.30 && hco3 <= 18)) {
+        if (ph < 7.00 || hco3 < 10 || ketone > 6.0) {
+          classEl.innerText = "DKA MỨC ĐỘ NẶNG";
+          statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Mức Độ Nặng";
+        } else if (ph < 7.25 || hco3 < 15) {
+          classEl.innerText = "DKA MỨC ĐỘ VỪA";
+          statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Mức Độ Vừa";
+        } else {
+          classEl.innerText = "DKA MỨC ĐỘ NHẸ";
+          statusTitle = "Toan Ceton Đái Tháo Đường (DKA) Mức Độ Nhẹ";
+        }
+        classEl.className = "text-xs font-bold text-red-600 mt-1";
       } else {
-        classEl.innerText = "Tăng Đường Huyết Cấp";
-        statusTitle = "Tăng Đường Huyết Nặng Cần Bù Dịch";
+        classEl.innerText = "TĂNG ĐƯỜNG HUYẾT ĐƠN THUẦN";
+        classEl.className = "text-xs font-bold text-amber-700 mt-1";
+        statusTitle = "Tăng Đường Huyết Chưa Có Toan Ceton Rõ";
+        statusTheme = "amber";
       }
 
       var statusCard = document.getElementById('status-card');
       var statusCat = document.getElementById('status-category');
       var statusIcon = document.getElementById('status-icon');
-      setCardStyle(statusCard, statusCat, statusIcon, 'red', classEl.innerText, 'fa-truck-medical');
+      setCardStyle(statusCard, statusCat, statusIcon, statusTheme, classEl.innerText, statusIconClass);
       document.getElementById('status-title').innerText = statusTitle;
 
-      // Axis 1: Fluid
+      // Trục 1: Bù dịch
       var fluidOrder = document.getElementById('dka-fluid-order');
       var hour1Rate = hasCHF ? "250 – 500 mL/h" : (Math.round(weight * 15) + " – " + Math.round(weight * 20) + " mL/h (Chuẩn: 1000 mL/h)");
       var nextFluid = naCorr >= 135 ? "NaCl 0.45% 250 – 500 mL/h" : "NaCl 0.9% 250 – 500 mL/h";
       
       var dextroseNote = "";
-      if (bg < 250) {
-        dextroseNote = '<p class="p-2 bg-amber-50 text-amber-900 border border-amber-300 rounded-lg font-bold"><i class="fa-solid fa-bell text-amber-600 mr-1"></i> BẮT BUỘC BỔ SUNG DỊCH GLUCOSE: Do đường huyết đã &lt; 250 mg/dL, phải truyền song song chai Glucose 5% (hoặc 10%) tốc độ 150 – 250 mL/h để ngừa phù não và tránh hạ đường huyết trong khi tiếp tục truyền insulin để xóa ceton.</p>';
+      if (bg < 250 && !isResolved) {
+        dextroseNote = '<p class="p-2.5 bg-amber-50 text-amber-900 border border-amber-300 rounded-lg text-xs md:text-sm font-semibold">' +
+          '<i class="fa-solid fa-bell text-amber-600 mr-1.5"></i> <b>BẮT BUỘC BỔ SUNG GLUCOSE:</b> Đường huyết đã &lt; 250 mg/dL nhưng Ceton máu vẫn chưa sạch (' + ketone.toFixed(1) + ' mmol/L). ' +
+          'Bắt buộc truyền song song chai Glucose 5% hoặc 10% (150–250 mL/h) kết hợp giữ insulin để tiếp tục ức chế sinh ceton mà không gây hạ đường huyết.</p>';
       }
 
       fluidOrder.innerHTML = '<p>• <b>Giờ đầu tiên (0 – 60 phút):</b> Truyền tĩnh mạch <b>NaCl 0.9% tốc độ ' + hour1Rate + '</b>' + (hasCHF ? ' <span class="text-red-600 font-bold">(Đã giảm liều do có suy tim/suy thận)</span>' : '') + '.</p>' +
         '<p>• <b>Từ giờ thứ 2 trở đi:</b> Dựa vào Natri hiệu chỉnh (' + naCorr.toFixed(1) + ' mEq/L) $\\rightarrow$ Sử dụng <b>' + nextFluid + '</b>.</p>' + dextroseNote;
 
-      // Axis 2: Potassium
+      // Trục 2: Bù Kali
       var kCard = document.getElementById('dka-k-card');
       var kOrder = document.getElementById('dka-k-order');
       var kBadge = document.getElementById('k-badge-status');
@@ -818,25 +866,25 @@ function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
         kOrder.innerHTML = '<div class="text-red-950 font-bold space-y-1">' +
           '<p class="text-base"><i class="fa-solid fa-ban text-red-600 mr-1.5"></i> TUYỆT ĐỐI TẠM HOÃN TRUYỀN INSULIN!</p>' +
           '<p>• Nồng độ Kali máu hiện tại là ' + k.toFixed(1) + ' mmol/L (&lt; 3.5). Bắt đầu truyền insulin lúc này có thể gây ngừng tim do hạ Kali máu cấp!</p>' +
-          '<p>• <b>Y lệnh bù Kali khẩn:</b> Truyền tĩnh mạch KCl 10 – 20 mmol/h (khoảng 10 – 15 mL KCl 10% pha dịch truyền) cho đến khi đo lại K+ ≥ 3.5 mmol/L mới được mở bơm tiêm điện Insulin.</p>' +
+          '<p>• <b>Y lệnh bù Kali khẩn:</b> Bù KCl tĩnh mạch 10 – 20 mmol/h cho đến khi đo lại K+ ≥ 3.5 mmol/L mới được mở bơm tiêm điện Insulin.</p>' +
           '</div>';
       } else if (k >= 3.5 && k <= 5.0) {
         kCard.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm";
         kBadge.className = "text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold";
         kBadge.innerText = "An Toàn Cho Phép";
 
-        kOrder.innerHTML = '<p>• Nồng độ Kali máu ' + k.toFixed(1) + ' mmol/L: <b>Đạt ngưỡng an toàn để truyền Insulin.</b></p>' +
-          '<p>• <b>Y lệnh bù duy trì:</b> Pha <b>20 – 30 mmol KCl</b> (10 – 15 mL KCl 10%) vào mỗi chai 500 mL hoặc 1000 mL dịch truyền để giữ Kali máu duy trì trong khoảng 4.0 – 5.0 mmol/L.</p>';
+        kOrder.innerHTML = '<p>• Kali máu ' + k.toFixed(1) + ' mmol/L: <b>Đạt ngưỡng an toàn để truyền Insulin.</b></p>' +
+          '<p>• <b>Y lệnh bù duy trì:</b> Pha <b>20 – 30 mmol KCl</b> (10 – 15 mL KCl 10%) vào mỗi chai 500 mL hoặc 1000 mL dịch truyền để giữ Kali máu trong khoảng 4.0 – 5.0 mmol/L.</p>';
       } else {
         kCard.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm";
         kBadge.className = "text-xs bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-semibold";
         kBadge.innerText = "K+ Cao, Không Pha Thêm";
 
         kOrder.innerHTML = '<p>• Kali máu ' + k.toFixed(1) + ' mmol/L: <b>Cho phép truyền Insulin ngay</b>.</p>' +
-          '<p>• <b>Không pha thêm Kali</b> vào dịch truyền lúc này. Kiểm tra lại điện giải đồ sau mỗi 2 giờ.</p>';
+          '<p>• Không pha thêm Kali vào dịch truyền lúc này. Kiểm tra lại điện giải đồ sau mỗi 2 giờ.</p>';
       }
 
-      // Axis 3: Insulin Infusion
+      // Trục 3: Insulin Bơm tiêm điện
       var insulinOrder = document.getElementById('dka-insulin-order');
       var rateBadge = document.getElementById('insulin-infusion-rate-badge');
 
@@ -844,24 +892,35 @@ function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
         rateBadge.innerText = "0.0 mL/h (KHÓA)";
         rateBadge.className = "text-xs bg-red-600 text-white px-2 py-0.5 rounded font-bold";
         insulinOrder.innerHTML = '<p class="text-red-700 font-bold"><i class="fa-solid fa-lock mr-1"></i> Bơm tiêm điện Insulin bị tạm khóa do K+ &lt; 3.5 mmol/L.</p>';
+      } else if (isResolved) {
+        rateBadge.innerText = "CHUẨN BỊ RÚT BTE";
+        rateBadge.className = "text-xs bg-emerald-600 text-white px-2 py-0.5 rounded font-bold";
+        insulinOrder.innerHTML = '<div class="p-3 bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl space-y-1.5 text-xs md:text-sm">' +
+          '<p class="font-bold text-emerald-800 text-base"><i class="fa-solid fa-circle-check mr-1.5"></i> ĐÃ ĐẠT TIÊU CHUẨN KẾT THÚC DKA (Resolution Criteria):</p>' +
+          '<p>• Đường huyết &lt; 200 mg/dL, pH &gt; 7.30, HCO3- &ge; 18 mEq/L và &beta;-hydroxybutyrate &lt; 0.6 mmol/L.</p>' +
+          '<p>• <b>QUY TRÌNH GỐI ĐẦU CHUYỂN TIÊM DƯỚI DA (SC):</b></p>' +
+          '<p>1. Cho người bệnh ăn đường miệng nếu tỉnh táo và không còn nôn ói.</p>' +
+          '<p>2. Tiêm mũi Insulin nền (Basal) hoặc Insulin bữa ăn dưới da <b>trước khi ngừng bơm tiêm điện ít nhất 1 – 2 giờ</b> (đối với insulin nhanh/Novomix) hoặc <b>2 – 4 giờ</b> (đối với Glargine/Degludec).</p>' +
+          '<p class="text-red-700 font-semibold">• <i>Cảnh báo: Tuyệt đối không tắt bơm tiêm điện ngay khi chưa tiêm gối đầu dưới da vì sẽ gây tái phát toan ceton dội ngược!</i></p>' +
+          '</div>';
       } else {
         var insulinRate = (bg >= 250) ? (weight * 0.1) : (weight * 0.03);
         insulinRate = Math.round(insulinRate * 10) / 10;
         rateBadge.innerText = insulinRate.toFixed(1) + ' mL/h';
         rateBadge.className = "text-xs bg-indigo-600 text-white px-2 py-0.5 rounded font-bold";
 
-        insulinOrder.innerHTML = '<p>• <b>Cách pha chuẩn bơm tiêm điện (BTE):</b> Lấy <b>50 UI Actrapid</b> + NaCl 0.9% vừa đủ <b>50 mL</b> (1 mL = 1 UI). Nhớ xả tráng dây truyền 20 mL dịch trước khi tiêm.</p>' +
-          '<p>• <b>Tốc độ bơm tiêm điện:</b> <span class="text-base font-bold text-indigo-700">' + insulinRate.toFixed(1) + ' mL/h</span> (= ' + insulinRate.toFixed(1) + ' UI/h) qua BTE.</p>' +
-          '<p>• <b>Mục tiêu giảm đường:</b> Duy trì tốc độ hạ <b>50 – 75 mg/dL/giờ</b>. Nếu sau 1 giờ hạ &lt; 50 mg/dL: Tăng gấp đôi tốc độ truyền.</p>' +
+        insulinOrder.innerHTML = '<p>• <b>Pha chuẩn bơm tiêm điện (BTE):</b> <b>50 UI Actrapid</b> + NaCl 0.9% vừa đủ <b>50 mL</b> (1 mL = 1 UI). Nhớ xả tráng dây truyền 20 mL dịch.</p>' +
+          '<p>• <b>Tốc độ bơm tiêm điện hiện tại:</b> <span class="text-base font-bold text-indigo-700">' + insulinRate.toFixed(1) + ' mL/h</span> (= ' + insulinRate.toFixed(1) + ' UI/h).</p>' +
+          '<p>• <b>Mục tiêu động học:</b> Hạ đường huyết 50 – 75 mg/dL/giờ và giảm Ceton máu khoảng <b>0.5 mmol/L/giờ</b>.</p>' +
           (bg < 250 ? '<p class="text-xs text-amber-700 font-semibold">• Đã tự động giảm tốc độ còn 0.02 - 0.05 UI/kg/h vì đường huyết &lt; 250 mg/dL.</p>' : '');
       }
 
-      // Axis 4: Nursing & Lab
+      // Trục 4: Kế hoạch theo dõi
       var monitorOrder = document.getElementById('dka-monitoring-order');
       monitorOrder.innerHTML = renderTimeline([
         { time: 'Mỗi 1 giờ/lần', desc: 'Bấm đường huyết mao mạch tại giường để hiệu chỉnh tốc độ bơm tiêm điện', critical: true },
-        { time: 'Mỗi 2 – 4 giờ/lần', desc: 'Làm lại Khí máu động mạch, Điện giải đồ (Kali, Natri) và Glucose TM', critical: true },
-        { time: 'Mỗi 4 giờ/lần', desc: 'Đo Ceton máu mao mạch (mục tiêu beta-hydroxybutyrate &lt; 0.6 mmol/L)', critical: false }
+        { time: 'Mỗi 2 giờ/lần', desc: 'Làm lại Điện giải đồ (Kali, Natri) và Khí máu động mạch', critical: true },
+        { time: 'Mỗi 2 – 4 giờ/lần', desc: 'Đo lại &beta;-hydroxybutyrate máu mao mạch (mục tiêu hạ 0.5 mmol/L/h đến khi &lt; 0.6 mmol/L)', critical: false }
       ]);
     }
 
@@ -915,7 +974,8 @@ function calculateInpatient18h(bg, weight, dose, tdd, isHighRisk) {
         { id: 'k-slider', valId: 'k-val', unit: '', isFloat: true, fixed: 1 },
         { id: 'na-slider', valId: 'na-val', unit: '', isFloat: false },
         { id: 'ph-slider', valId: 'ph-val', unit: '', isFloat: true, fixed: 2 },
-        { id: 'hco3-slider', valId: 'hco3-val', unit: '', isFloat: false }
+        { id: 'hco3-slider', valId: 'hco3-val', unit: '', isFloat: false },
+        { id: 'ketone-slider', valId: 'ketone-val', unit: '', isFloat: true, fixed: 1 }
       ];
 
       inputs.forEach(function(item) {
