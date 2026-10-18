@@ -60,14 +60,45 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- Left Column: Input Form (5 cols) -->
-      <section class="lg:col-span-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+      <section class="lg:col-span-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        
+        <!-- Header & Refresh -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
           <h2 class="text-base font-bold text-slate-800 flex items-center">
             <i class="fa-solid fa-sliders text-blue-600 mr-2"></i> Thông Số Lâm Sàng Hiện Tại
           </h2>
-          <span class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
+          <span class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
             <i class="fa-solid fa-rotate mr-1"></i>Kéo để cập nhật lại
           </span>
+        </div>
+
+        <!-- NEW: Evaluation Timepoint Selector Bar (Thanh thời điểm đánh giá) -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <i class="fa-regular fa-clock mr-1 text-blue-600"></i> Thời Điểm Đánh Giá / Lần Đo:
+            </span>
+            <span id="current-checkpoint-tag" class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+              Lần đầu nhập viện (T0)
+            </span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+            <button type="button" onclick="selectTimepoint('t0')" id="tp-btn-t0" class="tp-btn py-1.5 px-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-sm transition text-center">
+              Lần đầu (T0)
+            </button>
+            <button type="button" onclick="selectTimepoint('t1')" id="tp-btn-t1" class="tp-btn py-1.5 px-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition text-center">
+              Sau 1 giờ
+            </button>
+            <button type="button" onclick="selectTimepoint('t2')" id="tp-btn-t2" class="tp-btn py-1.5 px-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition text-center">
+              Sau 2 giờ
+            </button>
+            <button type="button" onclick="selectTimepoint('t4')" id="tp-btn-t4" class="tp-btn py-1.5 px-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition text-center">
+              Sau 4 giờ+
+            </button>
+          </div>
+          <p id="timepoint-hint" class="text-[11px] text-slate-500 italic">
+            *Đang ở mốc đánh giá khởi đầu: Ưu tiên hồi sức bù dịch NaCl 0.9% giờ đầu và kiểm tra Kali máu trước khi truyền Insulin.
+          </p>
         </div>
 
         <form id="calculator-form" class="space-y-4">
@@ -233,6 +264,19 @@
             </label>
           </div>
         </form>
+
+        <!-- Save Snapshot Button & History Table -->
+        <div class="pt-2 border-t border-slate-100">
+          <button type="button" onclick="saveCurrentSnapshot()" class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center">
+            <i class="fa-solid fa-bookmark mr-1.5 text-blue-600"></i> Lưu kết quả mốc này vào Nhật ký theo dõi
+          </button>
+          
+          <div id="snapshot-history-container" class="mt-3 hidden">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Diễn tiến các lần đo đã lưu:</span>
+            <div id="snapshot-history-list" class="space-y-1.5 mt-1.5 text-xs"></div>
+          </div>
+        </div>
+
       </section>
 
       <!-- Right Column: Decision Support Output Cards (7 cols) -->
@@ -342,7 +386,7 @@
           </div>
         </div>
 
-        <!-- DKA / HHS 4 Pillars -->
+        <!-- DKA / HHS 4 Action Pillars -->
         <div id="dka-action-grid" class="space-y-4 hidden">
           <!-- DKA Axis 1: Fluid -->
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -400,6 +444,75 @@
   <!-- JavaScript Application Logic -->
   <script>
     var currentMode = '18h';
+    var currentTimepoint = 't0';
+    var savedSnapshots = [];
+
+    var timepointHints = {
+      't0': { label: 'Lần đầu nhập viện (T0)', hint: '*Đang ở mốc đánh giá khởi đầu: Ưu tiên hồi sức bù dịch NaCl 0.9% giờ đầu và kiểm tra Kali máu trước khi truyền Insulin.' },
+      't1': { label: 'Sau 1 giờ điều trị (T1)', hint: '*Mốc 1 giờ: Đánh giá tốc độ giảm đường huyết mao mạch. Mục tiêu hạ 50 - 75 mg/dL/h; nếu hạ < 50 mg/dL/h cân nhắc tăng gấp đôi tốc độ BTE.' },
+      't2': { label: 'Sau 2 giờ điều trị (T2)', hint: '*Mốc 2 giờ: Bắt buộc thử lại Điện giải đồ (Kali, Natri) và Khí máu để quyết định chuyển sang NaCl 0.45% và duy trì bù Kali.' },
+      't4': { label: 'Sau 4 giờ trở đi (T4+)', hint: '*Mốc 4 giờ+: Kiểm tra lại Ceton máu. Khi đường huyết < 250 mg/dL truyền thêm Glucose 5%; khi Ceton < 0.6 chuẩn bị gối đầu tiêm dưới da.' }
+    };
+
+    function selectTimepoint(tp) {
+      currentTimepoint = tp;
+      var points = ['t0', 't1', 't2', 't4'];
+      points.forEach(function(p) {
+        var btn = document.getElementById('tp-btn-' + p);
+        if (p === tp) {
+          btn.className = "tp-btn py-1.5 px-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-sm transition text-center";
+        } else {
+          btn.className = "tp-btn py-1.5 px-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition text-center";
+        }
+      });
+
+      document.getElementById('current-checkpoint-tag').innerText = timepointHints[tp].label;
+      document.getElementById('timepoint-hint').innerText = timepointHints[tp].hint;
+    }
+
+    function saveCurrentSnapshot() {
+      var bg = document.getElementById('glucose-val').innerText;
+      var bgMmol = document.getElementById('glucose-mmol').innerText;
+      var timeLabel = timepointHints[currentTimepoint].label;
+      var modeStr = currentMode === 'dka' ? 'Cấp cứu DKA/HHS' : (currentMode === '18h' ? 'Trực 18h' : 'Trực 06h');
+      
+      var extra = "";
+      if (currentMode === 'dka') {
+        var k = document.getElementById('k-val').innerText;
+        var ket = document.getElementById('ketone-val').innerText;
+        extra = ' | K+: ' + k + ' mmol/L | Ceton: ' + ket + ' mmol/L';
+      }
+
+      var item = {
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        tp: timeLabel,
+        mode: modeStr,
+        bg: bg + ' mg/dL ' + bgMmol + extra
+      };
+
+      savedSnapshots.unshift(item);
+      renderSnapshots();
+    }
+
+    function renderSnapshots() {
+      var container = document.getElementById('snapshot-history-container');
+      var list = document.getElementById('snapshot-history-list');
+      if (savedSnapshots.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      list.innerHTML = savedSnapshots.slice(0, 5).map(function(s) {
+        return '<div class="p-2 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">' +
+          '<div>' +
+            '<span class="font-bold text-blue-700">' + s.tp + '</span> <span class="text-slate-400">(' + s.time + ')</span>: ' +
+            '<span class="font-semibold text-slate-800">' + s.bg + '</span>' +
+          '</div>' +
+          '<span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">' + s.mode + '</span>' +
+        '</div>';
+      }).join('');
+    }
 
     function switchTab(mode) {
       currentMode = mode;
@@ -510,7 +623,7 @@
           '<p>• <b class="text-red-700">Thời điểm tiêm:</b> BẮT BUỘC chỉ tiêm Novomix sau khi bệnh nhân đã ăn xong hoàn toàn suất ăn tối.</p>';
 
         orderTimeline.innerHTML = renderTimeline([
-          { time: 'Sau mỗi 15 phút', desc: 'Bấm lại đường huyết mao mạch đến khi &ge; 70 mg/dL (Cập nhật lại giá trị vào thanh trượt bên trái)', critical: true },
+          { time: 'Sau mỗi 15 phút', desc: 'Bấm lại đường huyết mao mạch đến khi &ge; 70 mg/dL (Cập nhật lại thanh trượt)', critical: true },
           { time: '22h00 đêm', desc: 'BẮT BUỘC đo kiểm tra để canh đỉnh tác dụng của Protamine nền', critical: true },
           { time: '02h00 sáng', desc: 'BẮT BUỘC đo kiểm tra ngừa hạ đường huyết lúc nửa đêm', critical: true },
           { time: '06h00 sáng mai', desc: 'Đo đường huyết đói sáng hôm sau', critical: false }
@@ -841,7 +954,6 @@
       var nonDkaGrid = document.getElementById('non-dka-fallback-grid');
 
       if (isNonDka) {
-        // TĂNG ĐƯỜNG HUYẾT ĐƠN THUẦN -> Ẩn phác đồ IV, hiện Panel hướng dẫn SC
         classEl.innerText = "TĂNG ĐƯỜNG HUYẾT ĐƠN THUẦN";
         classEl.className = "text-xs font-bold text-amber-700 mt-1";
         statusTitle = "Tăng Đường Huyết Đơn Thuần (Không có DKA hoặc HHS)";
@@ -851,7 +963,6 @@
         dkaGrid.classList.add('hidden');
         nonDkaGrid.classList.remove('hidden');
       } else {
-        // CÓ CHỈ ĐỊNH PHÁC ĐỒ CẤP CỨU DKA / HHS
         dkaGrid.classList.remove('hidden');
         nonDkaGrid.classList.add('hidden');
 
